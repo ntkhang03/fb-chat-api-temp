@@ -103,7 +103,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
   var mqttClient = ctx.mqttClient;
 
   mqttClient.on('error', function (err) {
-    log.error("listenMqtt", err);
+    //log.error("listenMqtt", err);
     mqttClient.end();
     if (ctx.globalOptions.autoReconnect) {
       getSeqID();
@@ -160,7 +160,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
     try {
       var jsonMessage = JSON.parse(message);
     } catch (ex) {
-      return log.error("listenMqtt", ex);
+      //return log.error("listenMqtt", ex);
     }
     if (topic === "/t_ms") {
       if (ctx.tmsWait && typeof ctx.tmsWait == "function") {
@@ -452,7 +452,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                 };
               })
               .catch((err) => {
-                log.error("forcedFetch", err);
+                //log.error("forcedFetch", err);
               })
               .finally(function () {
                 if (ctx.globalOptions.autoMarkDelivery) {
@@ -642,11 +642,11 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                   });
               }
             } else {
-              log.error("forcedFetch", fetchData);
+              //log.error("forcedFetch", fetchData);
             }
           })
           .catch((err) => {
-            log.error("forcedFetch", err);
+            //log.error("forcedFetch", err);
           });
       }
       break;
@@ -676,12 +676,12 @@ function markDelivery(ctx, api, threadID, messageID) {
   if (threadID && messageID) {
     api.markAsDelivered(threadID, messageID, (err) => {
       if (err) {
-        log.error("markAsDelivered", err);
+        //log.error("markAsDelivered", err);
       } else {
         if (ctx.globalOptions.autoMarkRead) {
           api.markAsRead(threadID, (err) => {
             if (err) {
-              log.error("markAsDelivered", err);
+              //log.error("markAsDelivered", err);
             }
           });
         }
@@ -721,7 +721,7 @@ module.exports = function (defaultFuncs, api, ctx) {
         }
       })
       .catch((err) => {
-        log.error("getSeqId", err);
+        //log.error("getSeqId", err);
         if (utils.getType(err) == "Object" && err.error === "Not logged in") {
           ctx.loggedIn = false;
         }
