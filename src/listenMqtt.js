@@ -505,7 +505,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
         case "change_thread_theme":
         case "change_thread_nickname":
         case "change_thread_icon":
-          break;
+        case "change_thread_admins":
         case "group_poll":
           var fmtMsg;
           try {
