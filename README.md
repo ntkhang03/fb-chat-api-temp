@@ -199,7 +199,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 <a name="projects-using-this-api"></a>
 ## Projects using this API:
 - [c3c](https://github.com/lequanglam/c3c) - A bot that can be customizable using plugins. Support Facebook & Discord.
-- [GOAT 🐐](https://github.com/ntkhang03/Goat-Bot) - A bot chat Messenger can be customizable using scripts. Support .
+- [GOAT BOT 🐐](https://github.com/ntkhang03/Goat-Bot) - A bot chat Messenger can be customizable using scripts. Support .
 
 ## Projects using this API (original repository, facebook-chat-api):
 
