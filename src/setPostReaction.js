@@ -56,7 +56,14 @@ module.exports = function(defaultFuncs, api, ctx) {
     if (utils.getType(type) !== "Number" && utils.getType(type) === "String") {
       type = map[type.toLowerCase()];
     }
-    else {
+    
+    if (utils.getType(type) !== "Number" && utils.getType(type) !== "String") {
+      throw {
+        error: "setPostReaction: Invalid reaction type"
+      };
+    }
+    
+    if (type != 0 && !type) {
       throw {
         error: "setPostReaction: Invalid reaction type"
       };
