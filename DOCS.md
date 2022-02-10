@@ -40,6 +40,7 @@
 * [`api.sendTypingIndicator`](#sendTypingIndicator)
 * [`api.setMessageReaction`](#setMessageReaction)
 * [`api.setOptions`](#setOptions)
+* [`api.setPostReaction`](#setPostReaction)
 * [`api.setTitle`](#setTitle)
 * [`api.threadColors`](#threadColors)
 * [`api.unsendMessage`](#unsendMessage)
@@ -1698,6 +1699,27 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
     });
 });
 ```
+
+---------------------------------------
+
+<a name="setPostReaction"></a>
+### api.setPostReaction(postID, type[, callback])
+__Arguments__
+
+* `postID`: id of the post to react.
+* `type`: A string reaction type or key reaction.
+* `callback(err, obj)`: A callback called when the query is done.
+
+|Key|Reaction Type|
+|---|---|
+|0|unlike|
+|1|like|
+|2|heart|
+|16|love|
+|4|haha|
+|3|wow|
+|7|sad|
+|8|angry|
 
 ---------------------------------------
 
