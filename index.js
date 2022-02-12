@@ -195,6 +195,7 @@ function buildAPI(globalOptions, html, jar) {
     'sendMessage',
     'sendTypingIndicator',
     'setMessageReaction',
+    'setPostReaction',
     'setTitle',
     'threadColors',
     'unsendMessage',
