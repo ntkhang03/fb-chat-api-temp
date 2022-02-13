@@ -31,7 +31,7 @@ module.exports = function(defaultFuncs, api, ctx) {
         callback(null, resData.body.toString());
       })
       .catch(function(err) {
-        log.error("httpPost", err);
+        log.error("httpPostFormData", err);
         return callback(err);
       });
 
