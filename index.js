@@ -203,6 +203,7 @@ function buildAPI(globalOptions, html, jar) {
     // HTTP
     'httpGet',
     'httpPost',
+    'httpPostFormData',
 
     // Deprecated features
     "getThreadListDeprecated",

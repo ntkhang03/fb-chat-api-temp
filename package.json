@@ -1,6 +1,6 @@
 {
   "name": "fb-chat-api",
-  "version": "10.3.16",
+  "version": "10.3.17",
   "description": "A Facebook chat API that doesn't rely on XMPP. Will NOT be deprecated after April 30th 2015.",
   "scripts": {
     "test": "mocha",
@@ -20,7 +20,7 @@
   "bugs": {
     "url": "https://github.com/fb-chat-api/fb-chat-api/issues"
   },
-  "author": "Avery, David, Maude, Benjamin, UIRI",
+  "author": "Avery, David, Maude, Benjamin, UIRI, NTKhang (rebuild)",
   "license": "MIT",
   "dependencies": {
     "bluebird": "^2.11.0",
