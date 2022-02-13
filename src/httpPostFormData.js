@@ -19,7 +19,8 @@ module.exports = function(defaultFuncs, api, ctx) {
     }
 
     form = form || {};
-
+    
+    
     callback = callback || function(err, data) {
         if (err) return rejectFunc(err);
         resolveFunc(data);
