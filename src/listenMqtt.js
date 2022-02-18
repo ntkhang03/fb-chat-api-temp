@@ -140,6 +140,10 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
     }
 
     mqttClient.publish(topic, JSON.stringify(queue), { qos: 1, retain: false });
+    
+    // set status online
+    // fix by NTKhang
+    mqttClient.publish("/foreground_state", JSON.stringify({"foreground": chatOn}), {qos: 1});
 
     var rTimeout = setTimeout(function () {
       mqttClient.end();

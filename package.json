@@ -1,6 +1,6 @@
 {
   "name": "fb-chat-api",
-  "version": "10.3.18",
+  "version": "10.3.19",
   "description": "A Facebook chat API that doesn't rely on XMPP. Will NOT be deprecated after April 30th 2015.",
   "scripts": {
     "test": "mocha",
