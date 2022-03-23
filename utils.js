@@ -795,10 +795,19 @@ function getAdminTextMessageType(type) {
   switch (type) {
     case "change_thread_theme":
       return "log:thread-color";
-    case "change_thread_nickname":
-      return "log:user-nickname";
     case "change_thread_icon":
       return "log:thread-icon";
+    case "change_thread_nickname":
+      return "log:user-nickname";
+    case "change_thread_admins":
+      return "log:thread-admins";
+    case "group_poll":
+      return "log:thread-poll";
+    case "change_thread_approval_mode":
+      return "log:thread-approval-mode";
+    case "messenger_call_log":
+    case "participant_joined_group_call":
+      return "log:thread-call";
     default:
       return type;
   }

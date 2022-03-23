@@ -103,7 +103,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
   var mqttClient = ctx.mqttClient;
 
   mqttClient.on('error', function (err) {
-    //log.error("listenMqtt", err);
+    log.error("listenMqtt", err);
     mqttClient.end();
     if (ctx.globalOptions.autoReconnect) {
       getSeqID();
@@ -214,8 +214,8 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
   });
 
   mqttClient.on('close', function () {
-    //(function () { globalCallback("Connection closed."); })();
-    // client.end();
+    globalCallback("Connection closed.");
+    //client.end();
   });
 }
 
@@ -495,7 +495,8 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
       var fmtMsg;
       try {
         fmtMsg = utils.formatDeltaReadReceipt(v.delta);
-      } catch (err) {
+      }
+      catch (err) {
         return globalCallback({
           error: "Problem parsing message object. Please open an issue at https://github.com/Schmavery/facebook-chat-api/issues.",
           detail: err,
