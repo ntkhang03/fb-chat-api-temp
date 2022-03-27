@@ -179,6 +179,7 @@ module.exports = function(defaultFuncs, api, ctx) {
       .post("https://www.facebook.com/api/graphqlbatch/", ctx.jar, form)
       .then(utils.parseAndCheckLogin(ctx, defaultFuncs))
       .then(function(resData) {
+        
         if (resData.error) {
           throw resData;
         }
@@ -186,9 +187,11 @@ module.exports = function(defaultFuncs, api, ctx) {
         // failure one.
         // @TODO What do we do in this case?
         if (resData[resData.length - 1].error_results !== 0) {
-          throw new Error("well darn there was an error_result");
+          throw resData[0].o0.errors[0];
         }
-
+				if (!resData[0].o0.data.message_thread) {
+				  throw new Error("can't find this thread");
+				}
         callback(null, formatThreadGraphQLResponse(resData[0]));
       })
       .catch(function(err) {
