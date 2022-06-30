@@ -90,6 +90,7 @@ function formatThreadGraphQLResponse(data) {
       messageThread.customization_info.outgoing_bubble_color
         ? messageThread.customization_info.outgoing_bubble_color.slice(2)
         : null,
+    threadTheme: messageThread.thread_theme,
     nicknames:
       messageThread.customization_info &&
       messageThread.customization_info.participant_customizations
