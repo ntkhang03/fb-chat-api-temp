@@ -140,10 +140,12 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
     }
 
     mqttClient.publish(topic, JSON.stringify(queue), { qos: 1, retain: false });
-    
+
     // set status online
     // fix by NTKhang
-    mqttClient.publish("/foreground_state", JSON.stringify({"foreground": chatOn}), {qos: 1});
+    mqttClient.publish("/foreground_state", JSON.stringify({ foreground: chatOn }), { qos: 1 });
+
+    mqttClient.publish("/set_client_settings", JSON.stringify({ make_user_available_when_in_foreground: true }), { qos: 1 });
 
     var rTimeout = setTimeout(function () {
       mqttClient.end();
@@ -166,7 +168,22 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
     } catch (ex) {
       //return log.error("listenMqtt", ex);
     }
-    if (topic === "/t_ms") {
+
+    if (jsonMessage.type === "jewel_requests_add") {
+      globalCallback(null, {
+        type: "friend_request_received",
+        actorFbId: jsonMessage.from.toString(),
+        timestamp: Date.now().toString()
+      })
+    }
+    else if (jsonMessage.type === "jewel_requests_remove_old") {
+      globalCallback(null, {
+        type: "friend_request_cancel",
+        actorFbId: jsonMessage.from.toString(),
+        timestamp: Date.now().toString()
+      })
+    }
+    else if (topic === "/t_ms") {
       if (ctx.tmsWait && typeof ctx.tmsWait == "function") {
         ctx.tmsWait();
       }
@@ -234,7 +251,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
           fmtMsg = utils.formatDeltaMessage(v);
         } catch (err) {
           return globalCallback({
-            error: "Problem parsing message object. Please open an issue at https://github.com/Schmavery/facebook-chat-api/issues.",
+            error: "Problem parsing message object. Please open an issue at https://github.com/ntkhang03/fb-chat-api/issues.",
             detail: err,
             res: v,
             type: "parse_error"
@@ -250,9 +267,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
           undefined :
           (function () { globalCallback(null, fmtMsg); })();
       } else {
-        if (
-          v.delta.attachments[i].mercury.attach_type == "photo"
-        ) {
+        if (v.delta.attachments[i].mercury.attach_type == "photo") {
           api.resolvePhotoUrl(
             v.delta.attachments[i].fbid,
             (err, url) => {
@@ -288,7 +303,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
               messageID: delta.deltaMessageReaction.messageId,
               reaction: delta.deltaMessageReaction.reaction,
               senderID: delta.deltaMessageReaction.senderId.toString(),
-              userID: delta.deltaMessageReaction.userId.toString()
+              userID: (delta.deltaMessageReaction.userId || delta.deltaMessageReaction.senderId).toString()
             });
           })();
         } else if (delta.deltaRecallMessageData && !!ctx.globalOptions.listenEvents) {
@@ -456,7 +471,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                 };
               })
               .catch((err) => {
-                //log.error("forcedFetch", err);
+                log.error("forcedFetch", err);
               })
               .finally(function () {
                 if (ctx.globalOptions.autoMarkDelivery) {
@@ -498,7 +513,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
       }
       catch (err) {
         return globalCallback({
-          error: "Problem parsing message object. Please open an issue at https://github.com/Schmavery/facebook-chat-api/issues.",
+          error: "Problem parsing message object. Please open an issue at https://github.com/ntkhang03/fb-chat-api/issues.",
           detail: err,
           res: v.delta,
           type: "parse_error"
@@ -517,7 +532,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
             fmtMsg = utils.formatDeltaEvent(v.delta);
           } catch (err) {
             return globalCallback({
-              error: "Problem parsing message object. Please open an issue at https://github.com/Schmavery/facebook-chat-api/issues.",
+              error: "Problem parsing message object. Please open an issue at https://github.com/ntkhang03/fb-chat-api/issues.",
               detail: err,
               res: v.delta,
               type: "parse_error"
@@ -543,7 +558,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
               "query_params": {
                 "thread_and_message_id": {
                   "thread_id": tid.toString(),
-                  "message_id": mid,
+                  "message_id": mid
                 }
               }
             }
@@ -568,23 +583,22 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
               log.info("forcedFetch", fetchData);
               switch (fetchData.__typename) {
                 case "ThreadImageMessage":
-                  (!ctx.globalOptions.selfListen &&
-                    fetchData.message_sender.id.toString() === ctx.userID) ||
-                    !ctx.loggedIn ?
+                  (!ctx.globalOptions.selfListenEvent && fetchData.message_sender.id.toString() === ctx.userID) || !ctx.loggedIn ?
                     undefined :
                     (function () {
                       globalCallback(null, {
-                        type: "change_thread_image",
+                        type: "event",
                         threadID: utils.formatID(tid.toString()),
-                        snippet: fetchData.snippet,
-                        timestamp: fetchData.timestamp_precise,
-                        author: fetchData.message_sender.id,
-                        image: {
+                        logMessageType: "log:thread-image",
+                        logMessageData: {
                           attachmentID: fetchData.image_with_metadata && fetchData.image_with_metadata.legacy_attachment_id,
                           width: fetchData.image_with_metadata && fetchData.image_with_metadata.original_dimensions.x,
                           height: fetchData.image_with_metadata && fetchData.image_with_metadata.original_dimensions.y,
                           url: fetchData.image_with_metadata && fetchData.image_with_metadata.preview.uri
-                        }
+                        },
+                        logMessageBody: fetchData.snippet,
+                        timestamp: fetchData.timestamp_precise,
+                        author: fetchData.message_sender.id,
                       });
                     })();
                   break;
@@ -647,11 +661,11 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                   });
               }
             } else {
-              //log.error("forcedFetch", fetchData);
+              log.error("forcedFetch", fetchData);
             }
           })
           .catch((err) => {
-            //log.error("forcedFetch", err);
+            log.error("forcedFetch", err);
           });
       }
       break;
@@ -663,15 +677,13 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
         formattedEvent = utils.formatDeltaEvent(v.delta);
       } catch (err) {
         return globalCallback({
-          error: "Problem parsing message object. Please open an issue at https://github.com/Schmavery/facebook-chat-api/issues.",
+          error: "Problem parsing message object. Please open an issue at https://github.com/ntkhang03/fb-chat-api/issues.",
           detail: err,
           res: v.delta,
           type: "parse_error"
         });
       }
-      return (!ctx.globalOptions.selfListen &&
-        formattedEvent.author.toString() === ctx.userID) ||
-        !ctx.loggedIn ?
+      return (!ctx.globalOptions.selfListenEvent && formattedEvent.author.toString() === ctx.userID) || !ctx.loggedIn ?
         undefined :
         (function () { globalCallback(null, formattedEvent); })();
   }
