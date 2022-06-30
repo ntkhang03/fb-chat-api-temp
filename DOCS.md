@@ -25,6 +25,9 @@
 * [`api.getUserID`](#getUserID)
 * [`api.getUserInfo`](#getUserInfo)
 * [`api.handleMessageRequest`](#handleMessageRequest)
+* [`api.httpGet`](#httpGet)
+* [`api.httpPost`](#httpPost)
+* [`api.httpPostFormData`](#httpPostFormData)
 * [`api.listen`](#listen)
 * [`api.listenMqtt`](#listenMqtt)
 * [`api.logout`](#logout)
@@ -77,7 +80,7 @@ nodejs login.js
 ---------------------------------------
 
 <a name="login"></a>
-### login(credentials[, options][, callback])
+### login(credentials, options, callback)
 
 This function is returned by `require(...)` and is the main entry point to the API.
 
@@ -103,10 +106,10 @@ __Arguments__
 * `options`: An object representing options to use when logging in (as described in [api.setOptions](#setOptions)).
 * `callback(err, api)`: A callback called when login is done (successful or not). `err` is an object containing a field `error`.
 
-__Example (Email & Password)__
+__Example (Email & Password)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
 
 ```js
-const login = require("fca-unofficial");
+const login = require("fb-chat-api");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -114,11 +117,11 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 });
 ```
 
-__Example (Email & Password then save appState to file)__
+__Example (Email & Password then save appState to file)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -127,25 +130,13 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 });
 ```
 
-__Example (AppState loaded from file)__
 
-```js
-const fs = require("fs");
-const login = require("fca-unofficial");
-
-login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
-    if(err) return console.error(err);
-    // Here you can use the api
-});
-```
-
-__Login Approvals (2-Factor Auth)__: When you try to login with Login Approvals enabled, your callback will be called with an error `'login-approval'` that has a `continue` function that accepts the approval code as a `string` or a `number`.
+__Login Approvals (2-Factor Auth)__: When you try to login with Login Approvals enabled, your callback will be called with an error `'login-approval'` that has a `continue` function that accepts the approval code as a `string` or a `number`. (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
 
 __Example__:
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const login = require("fb-chat-api");
 const readline = require("readline");
 
 var rl = readline.createInterface({
@@ -177,10 +168,25 @@ login(obj, (err, api) => {
 __Review Recent Login__: Sometimes Facebook will ask you to review your recent logins. This means you've recently logged in from a unrecognized location. This will will result in the callback being called with an error `'review-recent-login'` by default. If you wish to automatically approve all recent logins, you can set the option `forceLogin` to `true` in the `loginOptions`.
 
 
+
+<a name="loginWithAppstate"></a>
+#### __Example (AppState loaded from file)__: You can get fbstate using [this](https://github.com/ntkhang03/c3c-fbstate) extension
+
+```js
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
+
+login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
+    if(err) return console.error(err);
+    // Here you can use the api
+});
+```
+
+
 ---------------------------------------
 
 <a name="addUserToGroup"></a>
-### api.addUserToGroup(userID, threadID[, callback])
+### api.addUserToGroup(userID, threadID, callback)
 
 Adds a user (or array of users) to a group chat.
 
@@ -193,7 +199,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="changeAdminStatus"></a>
-### api.changeAdminStatus(threadID, adminIDs, adminStatus[, callback])
+### api.changeAdminStatus(threadID, adminIDs, adminStatus, callback)
 
 Given a adminID, or an array of adminIDs, will set the admin status of the user(s) to `adminStatus`.
 
@@ -206,8 +212,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if (err) return console.error(err);
@@ -230,7 +236,7 @@ function editAdminsCallback(err) {
 ---------------------------------------
 
 <a name="changeArchivedStatus"></a>
-### api.changeArchivedStatus(threadOrThreads, archive[, callback])
+### api.changeArchivedStatus(threadOrThreads, archive, callback)
 
 Given a threadID, or an array of threadIDs, will set the archive status of the threads to `archive`. Archiving a thread will hide it from the logged-in user's inbox until the next time a message is sent or received.
 
@@ -242,8 +248,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -257,7 +263,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeBlockedStatus"></a>
-### api.changeBlockedStatus(userID, block[, callback])
+### api.changeBlockedStatus(userID, block, callback)
 
 Prevents a user from privately contacting you. (Messages in a group chat will still be seen by both parties).
 
@@ -270,7 +276,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="changeGroupImage"></a>
-### api.changeGroupImage(image, threadID[, callback])
+### api.changeGroupImage(image, threadID, callback)
 
 Will change the group chat's image to the given image.
 
@@ -282,8 +288,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -297,7 +303,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeNickname"></a>
-### api.changeNickname(nickname, threadID, participantID[, callback])
+### api.changeNickname(nickname, threadID, participantID, callback)
 
 Will change the thread user nickname to the one provided.
 
@@ -310,8 +316,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -325,7 +331,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeThreadColor"></a>
-### api.changeThreadColor(color, threadID[, callback])
+### api.changeThreadColor(color, threadID, callback)
 
 Will change the thread color to the given hex string color ("#0000ff"). Set it
 to empty string if you want the default.
@@ -340,8 +346,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -355,7 +361,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeThreadEmoji"></a>
-### api.changeThreadEmoji(emoji, threadID[, callback])
+### api.changeThreadEmoji(emoji, threadID, callback)
 
 Will change the thread emoji to the one provided.
 
@@ -369,8 +375,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -384,7 +390,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="createNewGroup"></a>
-### api.createNewGroup(participantIDs[, groupTitle][, callback])
+### api.createNewGroup(participantIDs, groupTitle, callback)
 
 Create a new group chat.
 
@@ -396,7 +402,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="createPoll"></a>
-### api.createPoll(title, threadID[, options][, callback]) (*temporary deprecated because Facebook is updating this feature*)
+### api.createPoll(title, threadID, options, callback) (*temporary deprecated because Facebook is updating this feature*)
 
 Creates a poll with the specified title and optional poll options, which can also be initially selected by the logged-in user.
 
@@ -409,8 +415,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -427,7 +433,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="deleteMessage"></a>
-### api.deleteMessage(messageOrMessages[, callback])
+### api.deleteMessage(messageOrMessages, callback)
 
 Takes a messageID or an array of messageIDs and deletes the corresponding message.
 
@@ -437,8 +443,8 @@ __Arguments__
 
 __Example__
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -458,7 +464,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="deleteThread"></a>
-### api.deleteThread(threadOrThreads[, callback])
+### api.deleteThread(threadOrThreads, callback)
 
 Given a threadID, or an array of threadIDs, will delete the threads from your account. Note that this does *not* remove the messages from Facebook's servers - anyone who hasn't deleted the thread can still view all of the messages.
 
@@ -470,8 +476,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -485,7 +491,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="forwardAttachment"></a>
-### api.forwardAttachment(attachmentID, userOrUsers[, callback])
+### api.forwardAttachment(attachmentID, userOrUsers, callback)
 
 Forwards corresponding attachment to given userID or to every user from an array of userIDs
 
@@ -511,7 +517,7 @@ Returns the currently logged-in user's Facebook user ID.
 ---------------------------------------
 
 <a name="getEmojiUrl"></a>
-### api.getEmojiUrl(c, size[, pixelRatio])
+### api.getEmojiUrl(c, size, pixelRatio)
 
 Returns the URL to a Facebook Messenger-style emoji image asset.
 
@@ -527,8 +533,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -557,8 +563,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -615,7 +621,7 @@ function loadNextThreadHistory(api){
 ---------------------------------------
 
 <a name="getThreadInfo"></a>
-### api.getThreadInfo(threadID[, callback])
+### api.getThreadInfo(threadID, callback)
 
 Takes a threadID and a callback.  Works for both single-user and group threads.
 
@@ -924,8 +930,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -956,8 +962,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1002,7 +1008,7 @@ A dictionary mapping names of all currently valid thread themes to their theme I
 ---------------------------------------
 
 <a name="handleMessageRequest"></a>
-### api.handleMessageRequest(threadID, accept[, callback])
+### api.handleMessageRequest(threadID, accept, callback)
 
 Accept or ignore message request(s) with thread id `threadID`.
 
@@ -1014,10 +1020,47 @@ __Arguments__
 
 ---------------------------------------
 
+<a name="httpGet"></a>
+### api.httpGet(url, form, customHeader, callback, notAPI)
+
+Get data from a URL with method GET.
+
+__Arguments__
+
+* `url`: A string being the URL to get data from.
+* `form`: An object containing the form data to send.
+* `customHeader`: An object containing custom headers to send.
+* `callback(err, data)`: A callback called when the query is done (either with an error or with the resulting data).
+* `notAPI`: A boolean indicating whether the request is made from the API or not (default: false, meaning it's from the API).
+
+---------------------------------------
+
+<a name="httpPost"></a>
+### api.httpPost(url, form, customHeader, callback, notAPI)
+
+Get data from a URL with method POST.
+
+__Arguments__
+
+* Similar to [`api.httpGet`](#httpGet).
+
+---------------------------------------
+
+<a name="httpPostFormData"></a>
+### api.httpPostFormData(url, form, customHeader, callback, notAPI)
+
+Post form data to a URL.
+
+__Arguments__
+
+* Similar to [`api.httpGet`](#httpGet).
+
+---------------------------------------
+
 <a name="listen"></a>
 ### api.listen([callback])
 <a name="listenMqtt"></a>
-### api.listenMqtt([callback])
+### api.listenMqtt(callback)
 
 Will call `callback` when a new message is received on this account.
 By default this won't receive events (joining/leaving a chat, title change etc...) but it can be activated with `api.setOptions({listenEvents: true})`.  This will by default ignore messages sent by the current account, you can enable listening to your own messages with `api.setOptions({selfListen: true})`. This returns an `EventEmitter` that contains function `stopListening` that will stop the `listen` loop and is guaranteed to prevent any future calls to the callback given to `listen`. An immediate call to `stopListening` when an error occurs will prevent the listen function to continue.
@@ -1311,8 +1354,8 @@ Similar to how messages can vary based on their `type`, so too can the `attachme
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 // Simple echo bot. He'll repeat anything that you say.
 // Will stop when you say '/stop'
@@ -1358,7 +1401,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="markAsDelivered"></a>
-### api.markAsDelivered(threadID, messageID[, callback]])
+### api.markAsDelivered(threadID, messageID, callback])
 
 Given a threadID and a messageID will mark that message as delivered. If a message is marked as delivered that tells facebook servers that it was recieved.
 
@@ -1373,7 +1416,7 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
+const fs = require("fs-extra");
 const login = require("facebook-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
@@ -1391,7 +1434,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="markAsRead"></a>
-### api.markAsRead(threadID, [read[, callback]])
+### api.markAsRead(threadID, [read, callback])
 
 Given a threadID will mark all the unread messages in a thread as read. Facebook will take a couple of seconds to show that you've read the messages.
 
@@ -1406,8 +1449,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1431,14 +1474,14 @@ This function will mark all of messages in your inbox readed.
 ---------------------------------------
 
 <a name="markAsSeen"></a>
-### api.markAsSeen([seenTimestamp][, callback])
+### api.markAsSeen([seenTimestamp], callback)
 
 This function will mark your entire inbox as seen (don't be confused with read!).
 
 ---------------------------------------
 
 <a name="muteThread"></a>
-### api.muteThread(threadID, muteSeconds[, callback])
+### api.muteThread(threadID, muteSeconds, callback)
 
 Mute a chat for a period of time, or unmute a chat.
 
@@ -1451,8 +1494,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1469,7 +1512,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="removeUserFromGroup"></a>
-### api.removeUserFromGroup(userID, threadID[, callback])
+### api.removeUserFromGroup(userID, threadID, callback)
 
 Removes a user from a group chat.
 
@@ -1509,7 +1552,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="sendMessage"></a>
-### api.sendMessage(message, threadID[, callback][, messageID])
+### api.sendMessage(message, threadID, callback, messageID)
 
 Sends the given message to the threadID.
 
@@ -1539,8 +1582,8 @@ __Tip__: to find your own ID, you can look inside the cookies. The `userID` is u
 
 __Example (Basic Message)__
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1553,8 +1596,8 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 
 __Example (File upload)__
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1571,7 +1614,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 
 __Example (Mention)__
 ```js
-const login = require("fca-unofficial");
+const login = require("fb-chat-api");
 
 login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -1595,7 +1638,7 @@ login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
 
 __Example (Location)__
 ```js
-const login = require("fca-unofficial");
+const login = require("fb-chat-api");
 login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
     var yourID = "000000000000000";
@@ -1609,7 +1652,7 @@ login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
 ---------------------------------------
 
 <a name="sendTypingIndicator"></a>
-### api.sendTypingIndicator(threadID[, callback])
+### api.sendTypingIndicator(threadID, callback)
 
 Sends a "USERNAME is typing" indicator to other members of the thread indicated by `threadID`. This indication will disappear after 30 second or when the `end` function is called. The `end` function is returned by `api.sendTypingIndicator`.
 
@@ -1621,7 +1664,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="setMessageReaction"></a>
-### api.setMessageReaction(reaction, messageID[, callback[, forceCustomReaction]])
+### api.setMessageReaction(reaction, messageID, callback, forceCustomReaction)
 
 Sets reaction on message
 
@@ -1676,8 +1719,8 @@ __Arguments__
 __Example__
 
 ```js
-const fs = require("fs");
-const login = require("fca-unofficial");
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
 
 // Simple echo bot. This will send messages forever.
 
@@ -1703,7 +1746,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="setPostReaction"></a>
-### api.setPostReaction(postID, type[, callback])
+### api.setPostReaction(postID, type, callback)
 __Arguments__
 
 * `postID`: id of the post to react.
@@ -1724,7 +1767,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="setTitle"></a>
-### api.setTitle(newTitle, threadID[, callback])
+### api.setTitle(newTitle, threadID, callback)
 
 Sets the title of the group chat with thread id `threadID` to `newTitle`.
 
@@ -1739,7 +1782,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="unsendMessage"></a>
-### api.unsendMessage(messageID[, callback])
+### api.unsendMessage(messageID, callback)
 
 Revokes a message from anyone that could see that message with `messageID`
 
