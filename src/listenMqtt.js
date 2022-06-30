@@ -583,7 +583,6 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
               log.info("forcedFetch", fetchData);
               switch (fetchData.__typename) {
                 case "ThreadImageMessage":
-                  console.log(ctx.globalOptions.selfListenEvent);
                   (!ctx.globalOptions.selfListenEvent && fetchData.message_sender.id.toString() === ctx.userID) || !ctx.loggedIn ?
                     undefined :
                     (function () {
