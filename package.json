@@ -1,7 +1,7 @@
 {
   "name": "fb-chat-api",
-  "version": "10.4.3",
-  "description": "A Facebook chat API that doesn't rely on XMPP. Will NOT be deprecated after April 30th 2015.",
+  "version": "10.4.4",
+  "description": "A Facebook chat API that doesn't rely on XMPP",
   "scripts": {
     "test": "mocha",
     "lint": "./node_modules/.bin/eslint **.js",
@@ -15,7 +15,8 @@
     "facebook",
     "chat",
     "api",
-    "fca"
+    "fca",
+    "fb-chat-api"
   ],
   "bugs": {
     "url": "https://github.com/fb-chat-api/fb-chat-api/issues"

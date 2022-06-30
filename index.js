@@ -26,6 +26,9 @@ function setOptions(globalOptions, options) {
       case 'selfListen':
         globalOptions.selfListen = Boolean(options.selfListen);
         break;
+      case 'selfListenEvent':
+        globalOptions.selfListenEvent = options.selfListenEvent;
+        break;
       case 'listenEvents':
         globalOptions.listenEvents = Boolean(options.listenEvents);
         break;
@@ -568,6 +571,7 @@ function login(loginData, options, callback) {
 
   var globalOptions = {
     selfListen: false,
+    selfListenEvent: false,
     listenEvents: false,
     listenTyping: false,
     updatePresence: false,
@@ -604,4 +608,3 @@ function login(loginData, options, callback) {
 }
 
 module.exports = login;
-

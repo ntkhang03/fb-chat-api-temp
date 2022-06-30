@@ -126,7 +126,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
       max_deltas_able_to_process: 1000,
       delta_batch_size: 500,
       encoding: "JSON",
-      entity_fbid: ctx.userID,
+      entity_fbid: ctx.userID
     };
 
     if (ctx.syncToken) {
@@ -364,7 +364,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
             body: delta.deltaMessageReply.message.body || "",
             isGroup: !!delta.deltaMessageReply.message.messageMetadata.threadKey.threadFbId,
             mentions: mentions,
-            timestamp: delta.deltaMessageReply.message.messageMetadata.timestamp,
+            timestamp: delta.deltaMessageReply.message.messageMetadata.timestamp
           };
 
           if (delta.deltaMessageReply.repliedToMessage) {
@@ -424,7 +424,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                     "query_params": {
                       "thread_and_message_id": {
                         "thread_id": callbackToReturn.threadID,
-                        "message_id": delta.deltaMessageReply.replyToMessageId.id,
+                        "message_id": delta.deltaMessageReply.replyToMessageId.id
                       }
                     }
                   }
@@ -530,7 +530,8 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
           var fmtMsg;
           try {
             fmtMsg = utils.formatDeltaEvent(v.delta);
-          } catch (err) {
+          }
+          catch (err) {
             return globalCallback({
               error: "Problem parsing message object. Please open an issue at https://github.com/ntkhang03/fb-chat-api/issues.",
               detail: err,
@@ -542,7 +543,6 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
         default:
           return;
       }
-      break;
     //For group images
     case "ForcedFetch":
       if (!v.delta.threadKey) return;
@@ -583,6 +583,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
               log.info("forcedFetch", fetchData);
               switch (fetchData.__typename) {
                 case "ThreadImageMessage":
+                  console.log(ctx.globalOptions.selfListenEvent);
                   (!ctx.globalOptions.selfListenEvent && fetchData.message_sender.id.toString() === ctx.userID) || !ctx.loggedIn ?
                     undefined :
                     (function () {
@@ -598,7 +599,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                         },
                         logMessageBody: fetchData.snippet,
                         timestamp: fetchData.timestamp_precise,
-                        author: fetchData.message_sender.id,
+                        author: fetchData.message_sender.id
                       });
                     })();
                   break;
@@ -625,7 +626,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                       duration: (fetchData.extensible_attachment.story_attachment.media || {}).playable_duration_in_ms || 0,
 
                       subattachments: fetchData.extensible_attachment.subattachments,
-                      properties: fetchData.extensible_attachment.story_attachment.properties,
+                      properties: fetchData.extensible_attachment.story_attachment.properties
                     }],
                     mentions: {},
                     timestamp: parseInt(fetchData.timestamp_precise),
@@ -653,7 +654,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                       duration: (fetchData.extensible_attachment.story_attachment.media || {}).playable_duration_in_ms || 0,
 
                       subattachments: fetchData.extensible_attachment.subattachments,
-                      properties: fetchData.extensible_attachment.story_attachment.properties,
+                      properties: fetchData.extensible_attachment.story_attachment.properties
                     }],
                     mentions: {},
                     timestamp: parseInt(fetchData.timestamp_precise),
