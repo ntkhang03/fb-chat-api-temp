@@ -854,6 +854,7 @@ function formatDeltaEvent(m) {
     logMessageType: logMessageType,
     logMessageData: logMessageData,
     logMessageBody: m.messageMetadata.adminText,
+    timestamp: m.messageMetadata.timestamp,
     author: m.messageMetadata.actorFbId
   };
 }
@@ -1039,12 +1040,12 @@ function makeDefaults(html, userID, ctx) {
     return newObj;
   }
 
-  function postWithDefaults(url, jar, form, ctxx) {
-    return post(url, jar, mergeWithDefaults(form), ctx.globalOptions, ctxx || ctx);
+  function postWithDefaults(url, jar, form, ctxx, customHeader = {}) {
+    return post(url, jar, mergeWithDefaults(form), ctx.globalOptions, ctxx || ctx, customHeader);
   }
 
-  function getWithDefaults(url, jar, qs, ctxx) {
-    return get(url, jar, mergeWithDefaults(qs), ctx.globalOptions, ctxx || ctx);
+  function getWithDefaults(url, jar, qs, ctxx, customHeader = {}) {
+    return get(url, jar, mergeWithDefaults(qs), ctx.globalOptions, ctxx || ctx, customHeader);
   }
 
   function postFormDataWithDefault(url, jar, form, qs, ctxx) {
