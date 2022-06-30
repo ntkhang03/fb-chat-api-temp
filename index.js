@@ -161,6 +161,7 @@ function buildAPI(globalOptions, html, jar) {
     'addUserToGroup',
     'changeAdminStatus',
     'changeArchivedStatus',
+    'changeAvatar',
     'changeBio',
     'changeBlockedStatus',
     'changeGroupImage',
