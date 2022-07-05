@@ -4,7 +4,7 @@ var utils = require("../utils");
 var log = require("npmlog");
 
 module.exports = function (defaultFuncs, api, ctx) {
-  return function httpPost(url, form, customHeaders, callback, notAPI) {
+  return function httpPost(url, form, customHeader, callback, notAPI) {
     var resolveFunc = function () { };
     var rejectFunc = function () { };
 
@@ -13,12 +13,17 @@ module.exports = function (defaultFuncs, api, ctx) {
       rejectFunc = reject;
     });
 
-    if (!callback && (utils.getType(customHeaders) == "Function" || utils.getType(customHeaders) == "AsyncFunction")) {
-      callback = customHeaders;
-      customHeaders = {};
+    if (utils.getType(form) == "Function" || utils.getType(form) == "AsyncFunction") {
+      callback = form;
+      form = {};
     }
 
-    customHeaders = customHeaders || {};
+    if (utils.getType(customHeader) == "Function" || utils.getType(customHeader) == "AsyncFunction") {
+      callback = customHeader;
+      customHeader = {};
+    }
+
+    customHeader = customHeader || {};
 
     callback = callback || function (err, data) {
       if (err) return rejectFunc(err);
@@ -27,7 +32,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 
     if (notAPI) {
       utils
-        .post(url, ctx.jar, form, ctx.globalOptions, ctx, customHeaders)
+        .post(url, ctx.jar, form, ctx.globalOptions, ctx, customHeader)
         .then(function (resData) {
           callback(null, resData.body.toString());
         })
@@ -37,7 +42,7 @@ module.exports = function (defaultFuncs, api, ctx) {
         });
     } else {
       defaultFuncs
-        .post(url, ctx.jar, form, {}, customHeaders)
+        .post(url, ctx.jar, form, {}, customHeader)
         .then(function (resData) {
           callback(null, resData.body.toString());
         })

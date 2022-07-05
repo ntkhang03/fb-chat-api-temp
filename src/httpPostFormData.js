@@ -6,7 +6,7 @@ var log = require("npmlog");
 
 module.exports = function (defaultFuncs, api, ctx) {
 
-  return function httpPostFormData(url, form, callback, notAPI) {
+  return function httpPostFormData(url, form, customHeader, callback, notAPI) {
     var resolveFunc = function () { };
     var rejectFunc = function () { };
 
@@ -15,7 +15,12 @@ module.exports = function (defaultFuncs, api, ctx) {
       rejectFunc = reject;
     });
 
-    if (!callback && (utils.getType(customHeader) == "Function" || utils.getType(customHeader) == "AsyncFunction")) {
+    if (utils.getType(form) == "Function" || utils.getType(form) == "AsyncFunction") {
+      callback = form;
+      form = {};
+    }
+
+    if (utils.getType(customHeader) == "Function" || utils.getType(customHeader) == "AsyncFunction") {
       callback = customHeader;
       customHeader = {};
     }
