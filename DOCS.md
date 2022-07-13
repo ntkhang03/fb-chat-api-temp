@@ -630,28 +630,35 @@ __Arguments__
 * `callback(err, info)`: If `err` is `null`, `info` will contain the following properties:
 
 | Key   |      Description      |
-|----------|:-------------:|
+|:----------:|:-------------:|
 | threadID | ID of the thread |
 | participantIDs |    Array of user IDs in the thread   |
 | threadName | Name of the thread. Usually the name of the user. In group chats, this will be empty if the name of the group chat is unset. |
 | userInfo | An array contains info of members, which has the same structure as [`getUserInfo`](#getUserInfo), but add a key `id`, contain ID of member currently at. |
-| nicknames |    Map of nicknames for members of the thread. If there are no nicknames set, this will be null.   |
+| nicknames |    Map of nicknames for members of the thread. If there are no nicknames set, this will be `null`. Can be of the form: <ul><li>`{'123456789': "nickname"}`</ul></li> |
 | unreadCount | Number of unread messages |
 | messageCount | Number of messages |
-| imageSrc | URL to the group chat photo. Null if unset or a 1-1 thread. |
+| imageSrc | URL to the group chat photo. `null` if unset or a 1-1 thread. |
 | timestamp | Timestamp of last activity |
 | muteUntil | Timestamp at which the thread will no longer be muted. The timestamp will be -1 if the thread is muted indefinitely or null if the thread is not muted. |
 | isGroup | boolean, true if this thread is a group thread (more than 2 participants). |
 | isSubscribed |  |
-| folder | The folder that the thread is in. Can be one of: <ul><li>'inbox'</li><li>'archive'</li></ul> |
+| folder | The folder that the thread is in. Can be one of: `INBOX`, `ARCHIVED`, `PENDING` or `OTHER` |
 | isArchived | True if the thread is archived, false if not |
 | cannotReplyReason | If you cannot reply to this thread, this will be a string stating why. Otherwise it will be null. |
 | lastReadTimestamp | Timestamp of the last message that is marked as 'read' by the current user. |
 | emoji | Object with key 'emoji' whose value is the emoji unicode character. Null if unset. |
 | color | String form of the custom color in hexadecimal form. |
-| adminIDs | Array of user IDs of the admins of the thread. Empty array if unset. |
+| adminIDs | Array of user IDs of the admins of the thread. Empty array if unset. Can be of the form:<ul><li>`[{ id: '123456789' }]`</li></ul> |
 | approvalMode | `true` or `false`, used to check if this group requires admin approval to add users |
 | approvalQueue | Array of object that has the following keys: <ul><li>`inviterID`: ID of the user invited the person to the group</li><li>`requesterID`: ID of the person waiting to be approved</li><li>`timestamp`: Request timestamp</li></ul> |
+| inviteLink | Invite link for the thread. <ul><li>`enable`: `true` if the invite link is enabled, `false` if it is disabled</li> <li>`link`: Invite link</li></ul> |
+
+`accountType` is one of the following:
+- `"User"`
+- `"Page"`
+- `"UnavailableMessagingActor"`
+- `"ReducedMessagingActor"`
 
 ---------------------------------------
 
@@ -676,41 +683,7 @@ __Arguments__
 
 *if you find something new, let us know*
 
-* `callback(err, list)`: Callback called when the query is done (either with an error or with a proper result). `list` is an *array* with objects with the following properties:
-
-__Thread list__
-
-| Key                  | Description                                                 |
-|----------------------|-------------------------------------------------------------|
-| threadID             | ID of the thread                                            |
-| name                 | The name of the thread                                      |
-| unreadCount          | Amount of unread messages in thread                         |
-| messageCount         | Amount of messages in thread                                |
-| imageSrc             | Link to the thread's image or `null`                        |
-| emoji                | The default emoji in thread (classic like is `null`)        |
-| color                | Thread's message color in `RRGGBB` (default blue is `null`) |
-| nicknames            | An array of `{"userid": "1234", "nickname": "John Doe"}`    |
-| muteUntil            | Timestamp until the mute expires or `null`                  |
-| participants         | An array of participants. See below                         |
-| adminIDs             | An array of thread admin IDs                                |
-| folder               | `INBOX`, `ARCHIVED`, `PENDING` or `OTHER`                   |
-| isGroup              | `true` or `false`                                           |
-| customizationEnabled | `false` in one-to-one conversations with `Page` or `ReducedMessagingActor` |
-| participantAddMode   | currently `"ADD"` for groups and `null` otherwise           |
-| reactionsMuteMode    | `REACTIONS_NOT_MUTED` or `REACTIONS_MUTED`                  |
-| mentionsMuteMode     | `MENTIONS_NOT_MUTED` or `MENTIONS_MUTED`                    |
-| isArchived           | `true` or `false`                                           |
-| isSubscribed         | `true` or `false`                                           |
-| timestamp            | timestamp in miliseconds                                    |
-| snippet              | Snippet's text message                                      |
-| snippetAttachments   | Attachments in snippet                                      |
-| snippetSender        | ID of snippet sender                                        |
-| lastMessageTimestamp | timestamp in milliseconds                                   |
-| lastReadTimestamp    | timestamp in milliseconds or `null`                         |
-| cannotReplyReason    | `null`, `"RECIPIENTS_NOT_LOADABLE"` or `"BLOCKED"`          |
-| approvalMode         | `true` or `false`, used to check if this group requires admin approval to add users |
-
-__`participants` format__
+* `callback(err, list)`: Callback called when the query is done (either with an error or with a proper result). `list` is an *array* with objects with the following properties same structure as [`getThreadInfo`](#getThreadInfo)
 
 `accountType` is one of the following:
 - `"User"`
