@@ -26,7 +26,7 @@ It will download `fb-chat-api` from NPM repositories
 ### Bleeding edge
 If you want to use bleeding edge (directly from github) to test new features or submit bug report, this is the command for you:
 ```bash
-npm install fb-chat-api/fb-chat-api
+npm install ntkhang03/fb-chat-api
 ```
 
 ## Testing your bots
@@ -126,7 +126,7 @@ Alternative: Use [c3c-fbstate](https://github.com/lequanglam/c3c-fbstate) to get
 ------------------------------------
 
 ### Listening to a chat
-#### api.listen(callback)
+#### api.listenMqtt(callback)
 
 Listen watches for messages sent in a chat. By default this won't receive events (joining/leaving a chat, title change etc…) but it can be activated with `api.setOptions({listenEvents: true})`. This will by default ignore messages sent by the current account, you can enable listening to your own messages with `api.setOptions({selfListen: true})`.
 
