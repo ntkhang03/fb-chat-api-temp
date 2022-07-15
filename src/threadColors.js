@@ -54,9 +54,9 @@ module.exports = function(_defaultFuncs, _api, _ctx) {
     Candy:           "205488546921017",
 
     /**
-    * July 06, 2022
-    * added by @NTKhang
-    **/
+     * July 06, 2022
+     * added by @NTKhang
+     */
     Earth:           "1833559466821043",
     Support:         "365557122117011",
     Music:           "339021464972092",
@@ -96,7 +96,13 @@ module.exports = function(_defaultFuncs, _api, _ctx) {
     Peach:           "3022526817824329",
     Honey:           "672058580051520",
     Kiwi:            "3151463484918004",
-    Grape:           "193497045377796"
+    Grape:           "193497045377796",
+
+		/**
+		 * July 15, 2022
+		 * added by @NTKhang
+		 */
+		"NonBinary":      "737761000603635"
     //StarWars:       "809305022860427" Removed.
   };
 };
