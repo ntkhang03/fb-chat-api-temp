@@ -3,13 +3,31 @@
 var utils = require("../utils");
 var log = require("npmlog");
 
+
+function getExtension(original_extension, filename = "") {
+	if (original_extension) {
+		return original_extension;
+	}
+	else {
+		const extension = filename.split(".").pop();
+		if (extension === filename) {
+			return "";
+		}
+		else {
+			return extension;
+		}
+	}
+}
+
 function formatAttachmentsGraphQLResponse(attachment) {
+	console.log(JSON.stringify(attachment, null, 2));
   switch (attachment.__typename) {
     case "MessageImage":
       return {
         type: "photo",
         ID: attachment.legacy_attachment_id,
         filename: attachment.filename,
+				original_extension: getExtension(attachment.original_extension, attachment.filename),
         thumbnailUrl: attachment.thumbnail.uri,
 
         previewUrl: attachment.preview.uri,
@@ -57,6 +75,7 @@ function formatAttachmentsGraphQLResponse(attachment) {
         type: "animated_image",
         ID: attachment.legacy_attachment_id,
         filename: attachment.filename,
+				original_extension: getExtension(attachment.original_extension, attachment.filename),
 
         previewUrl: attachment.preview_image.uri,
         previewWidth: attachment.preview_image.width,
@@ -87,8 +106,10 @@ function formatAttachmentsGraphQLResponse(attachment) {
     case "MessageVideo":
       return {
         type: "video",
-        filename: attachment.filename,
         ID: attachment.legacy_attachment_id,
+        filename: attachment.filename,
+				original_extension: getExtension(attachment.original_extension, attachment.filename),
+				duration: attachment.playable_duration_in_ms,
 
         thumbnailUrl: attachment.large_image.uri, // @Legacy
 
@@ -100,14 +121,14 @@ function formatAttachmentsGraphQLResponse(attachment) {
         width: attachment.original_dimensions.x,
         height: attachment.original_dimensions.y,
 
-        duration: attachment.playable_duration_in_ms,
         videoType: attachment.video_type.toLowerCase()
       };
     case "MessageFile":
       return {
         type: "file",
-        filename: attachment.filename,
         ID: attachment.message_file_fbid,
+        filename: attachment.filename,
+				original_extension: getExtension(attachment.original_extension, attachment.filename),
 
         url: attachment.url,
         isMalicious: attachment.is_malicious,
@@ -120,11 +141,12 @@ function formatAttachmentsGraphQLResponse(attachment) {
     case "MessageAudio":
       return {
         type: "audio",
-        filename: attachment.filename,
         ID: attachment.url_shimhash, // Not fowardable
+        filename: attachment.filename,
+				original_extension: getExtension(attachment.original_extension, attachment.filename),
 
+				duration: attachment.playable_duration_in_ms,
         audioType: attachment.audio_type,
-        duration: attachment.playable_duration_in_ms,
         url: attachment.playable_url,
 
         isVoiceMail: attachment.is_voicemail
