@@ -589,6 +589,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                       globalCallback(null, {
                         type: "event",
                         threadID: utils.formatID(tid.toString()),
+												messageID:fetchData.message_id,
                         logMessageType: "log:thread-image",
                         logMessageData: {
                           attachmentID: fetchData.image_with_metadata && fetchData.image_with_metadata.legacy_attachment_id,
