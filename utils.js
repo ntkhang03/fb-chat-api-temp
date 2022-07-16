@@ -905,6 +905,7 @@ function formatDeltaEvent(m) {
 				m.messageMetadata.threadKey.otherUserFbId
 			).toString()
 		),
+		messageID: m.messageMetadata.messageId.toString(),
 		logMessageType: logMessageType,
 		logMessageData: logMessageData,
 		logMessageBody: m.messageMetadata.adminText,
