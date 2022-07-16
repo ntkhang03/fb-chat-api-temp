@@ -58,7 +58,7 @@ You can see it [here](DOCS.md).
 ## Main Functionality
 
 ### Sending a message
-#### api.sendMessage(message, threadID[, callback][, messageID])
+#### api.sendMessage(message, threadID, [callback], [messageID])
 
 Various types of message can be sent:
 * *Regular:* set field `body` to the desired message as a string.

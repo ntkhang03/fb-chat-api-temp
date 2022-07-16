@@ -1,52 +1,53 @@
 # Documentation
+### You can use callback or .then() .catch() or async/await
 
-* [`login`](#login)
-* [`api.addUserToGroup`](#addUserToGroup)
-* [`api.changeAdminStatus`](#changeAdminStatus)
-* [`api.changeArchivedStatus`](#changeArchivedStatus)
-* [`api.changeBlockedStatus`](#changeBlockedStatus)
-* [`api.changeGroupImage`](#changeGroupImage)
-* [`api.changeNickname`](#changeNickname)
-* [`api.changeThreadColor`](#changeThreadColor)
-* [`api.changeThreadEmoji`](#changeThreadEmoji)
-* [`api.createNewGroup`](#createNewGroup)
-* [`api.createPoll`](#createPoll)
-* [`api.deleteMessage`](#deleteMessage)
-* [`api.deleteThread`](#deleteThread)
-* [`api.forwardAttachment`](#forwardAttachment)
-* [`api.getAppState`](#getAppState)
-* [`api.getCurrentUserID`](#getCurrentUserID)
-* [`api.getEmojiUrl`](#getEmojiUrl)
-* [`api.getFriendsList`](#getFriendsList)
-* [`api.getThreadHistory`](#getThreadHistory)
-* [`api.getThreadInfo`](#getThreadInfo)
-* [`api.getThreadList`](#getThreadList)
-* [`api.getThreadPictures`](#getThreadPictures)
-* [`api.getUserID`](#getUserID)
-* [`api.getUserInfo`](#getUserInfo)
-* [`api.handleMessageRequest`](#handleMessageRequest)
-* [`api.httpGet`](#httpGet)
-* [`api.httpPost`](#httpPost)
-* [`api.httpPostFormData`](#httpPostFormData)
-* [`api.listen`](#listen)
-* [`api.listenMqtt`](#listenMqtt)
-* [`api.logout`](#logout)
-* [`api.markAsDelivered`](#markAsDelivered)
-* [`api.markAsRead`](#markAsRead)
-* [`api.markAsReadAll`](#markAsReadAll)
-* [`api.markAsSeen`](#markAsSeen)
-* [`api.muteThread`](#muteThread)
-* [`api.removeUserFromGroup`](#removeUserFromGroup)
-* [`api.resolvePhotoUrl`](#resolvePhotoUrl)
-* [`api.searchForThread`](#searchForThread)
-* [`api.sendMessage`](#sendMessage)
-* [`api.sendTypingIndicator`](#sendTypingIndicator)
-* [`api.setMessageReaction`](#setMessageReaction)
-* [`api.setOptions`](#setOptions)
-* [`api.setPostReaction`](#setPostReaction)
-* [`api.setTitle`](#setTitle)
-* [`api.threadColors`](#threadColors)
-* [`api.unsendMessage`](#unsendMessage)
+* [`login(credentials, options, [callback])`](#logincredentials-options-callback) ⇒ <code>Promise</code>
+* [`api.addUserToGroup(userID, threadID, [callback])`](#apiaddusertogroupuserid-threadid-callback) ⇒ <code>Promise</code>
+* [`api.changeAdminStatus(threadID, adminIDs, adminStatus, [callback])`](#apichangeadminstatusthreadid-adminids-adminstatus-callback) ⇒ <code>Promise</code>
+* [`api.changeArchivedStatus(threadOrThreads, archive, [callback])`](#apichangearchivedstatusthreadorthreads-archive-callback) ⇒ <code>Promise</code>
+* [`api.changeBlockedStatus(userID, block, [callback])`](#apichangeblockedstatususerid-block-callback) ⇒ <code>Promise</code>
+* [`api.changeGroupImage(image, threadID, [callback])`](#apichangegroupimageimage-threadid-callback) ⇒ <code>Promise</code>
+* [`api.changeNickname(nickname, threadID, participantID, [callback])`](#apichangenicknamenickname-threadid-participantid-callback) ⇒ <code>Promise</code>
+* [`api.changeThreadColor(color, threadID, [callback])`](#apichangethreadcolorcolor-threadid-callback) ⇒ <code>Promise</code>
+* [`api.changeThreadEmoji(emoji, threadID, [callback])`](#apichangethreademojiemoji-threadid-callback) ⇒ <code>Promise</code>
+* [`api.createNewGroup(participantIDs, groupTitle, [callback])`](#apicreatenewgroupparticipantids-grouptitle-callback) ⇒ <code>Promise</code>
+* [`api.createPoll(title, threadID, options, [callback]) (*temporary deprecated because Facebook is updating this feature*)`](#apicreatepolltitle-threadid-options-callback-temporary-deprecated-because-facebook-is-updating-this-feature) ⇒ <code>Promise</code>
+* [`api.deleteMessage(messageOrMessages, [callback])`](#apideletemessagemessageormessages-callback) ⇒ <code>Promise</code>
+* [`api.deleteThread(threadOrThreads, [callback])`](#apideletethreadthreadorthreads-callback) ⇒ <code>Promise</code>
+* [`api.forwardAttachment(attachmentID, userOrUsers, [callback])`](#apiforwardattachmentattachmentid-userorusers-callback) ⇒ <code>Promise</code>
+* [`api.getAppState()`](#apigetappstate) ⇒ <code>Array</code>
+* [`api.getCurrentUserID()`](#apigetcurrentuserid) ⇒ <code>string</code>
+* [`api.getEmojiUrl(c, size, pixelRatio)`](#apigetemojiurlc-size-pixelratio) ⇒ <code>string</code>
+* [`api.getFriendsList([callback])`](#apigetfriendslistcallback) ⇒ <code>Promise</code>
+* [`api.getMessage(threadID, messageID, [callback])`](#apigetmessagethreadid-messageid-callback) ⇒ <code>Promise</code>
+* [`api.getThreadHistory(threadID, amount, timestamp, [callback])`](#apigetthreadhistorythreadid-amount-timestamp-callback) ⇒ <code>Promise</code>
+* [`api.getThreadList(limit, timestamp, tags, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
+* [`api.getThreadPictures(threadID, offset, limit, [callback])`](#apigetthreadpicturesthreadid-offset-limit-callback) ⇒ <code>Promise</code>
+* [`api.getUserID(name, [callback])`](#apigetuseridname-callback) ⇒ <code>Promise</code>
+* [`api.getUserInfo(ids, [callback])`](#apigetuserinfoids-callback) ⇒ <code>Promise</code>
+* [`api.threadColors`](#apithreadcolors) ⇒ <code>Promise</code>
+* [`api.handleMessageRequest(threadID, accept, [callback])`](#apihandlemessagerequestthreadid-accept-callback) ⇒ <code>Promise</code>
+* [`api.httpGet(url, form, [customHeader], [callback], [notAPI])`](#apihttpgeturl-form-customheader-callback-notapi) ⇒ <code>Promise</code>
+* [`api.httpPost(url, form, [customHeader], [callback], [notAPI])`](#apihttpposturl-form-customheader-callback-notapi) ⇒ <code>Promise</code>
+* [`api.httpPostFormData(url, form, [customHeader], [callback], [notAPI])`](#apihttppostformdataurl-form-customheader-callback-notapi) ⇒ <code>Promise</code>
+* [~~`api.listen([callback])`~~](#apilistencallback) ⇒ <code>Promise</code>
+* [`api.listenMqtt([callback])`](#apilistenmqttcallback) ⇒ <code>Promise</code>
+* [`api.logout([callback])`](#apilogoutcallback) ⇒ <code>Promise</code>
+* [`api.markAsDelivered(threadID, messageID, [callback]`](#apimarkasdeliveredthreadid-messageid-callback) ⇒ <code>Promise</code>
+* [`api.markAsRead(threadID, [read, [callback]])`](#apimarkasreadthreadid-read-callback) ⇒ <code>Promise</code>
+* [`api.markAsReadAll([callback])`](#apimarkasreadallcallback) ⇒ <code>Promise</code>
+* [`api.markAsSeen([seenTimestamp], [callback])`](#apimarkasseenseentimestamp-callback) ⇒ <code>Promise</code>
+* [`api.muteThread(threadID, muteSeconds, [callback])`](#apimutethreadthreadid-muteseconds-callback) ⇒ <code>Promise</code>
+* [`api.removeUserFromGroup(userID, threadID, [callback])`](#apiremoveuserfromgroupuserid-threadid-callback) ⇒ <code>Promise</code>
+* [`api.resolvePhotoUrl(photoID, [callback])`](#apiresolvephotourlphotoid-callback) ⇒ <code>Promise</code>
+* [`api.searchForThread(name, [callback])`](#apisearchforthreadname-callback)
+* [`api.sendMessage(message, threadID, [callback], messageID)`](#apisendmessagemessage-threadid-callback-messageid) ⇒ <code>Promise</code>
+* [`api.sendTypingIndicator(threadID, [callback])`](#apisendtypingindicatorthreadid-callback) ⇒ <code>Promise</code>
+* [`api.setMessageReaction(reaction, messageID, [callback], [forceCustomReaction])`](#apisetmessagereactionreaction-messageid-callback-forcecustomreaction) ⇒ <code>Promise</code>
+* [`api.setOptions(options)`](#apisetoptionsoptions) ⇒ <code>Promise</code>
+* [`api.setPostReaction(postID, type, [callback])`](#apisetpostreactionpostid-type-callback) ⇒ <code>Promise</code>
+* [`api.setTitle(newTitle, threadID, [callback])`](#apisettitlenewtitle-threadid-callback) ⇒ <code>Promise</code>
+* [`api.unsendMessage(messageID, [callback])`](#apiunsendmessagemessageid-callback) ⇒ <code>Promise</code>
 
 ---------------------------------------
 
@@ -80,7 +81,7 @@ nodejs login.js
 ---------------------------------------
 
 <a name="login"></a>
-### login(credentials, options, callback)
+### login(credentials, options, [callback])
 
 This function is returned by `require(...)` and is the main entry point to the API.
 
@@ -186,7 +187,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="addUserToGroup"></a>
-### api.addUserToGroup(userID, threadID, callback)
+### api.addUserToGroup(userID, threadID, [callback])
 
 Adds a user (or array of users) to a group chat.
 
@@ -199,7 +200,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="changeAdminStatus"></a>
-### api.changeAdminStatus(threadID, adminIDs, adminStatus, callback)
+### api.changeAdminStatus(threadID, adminIDs, adminStatus, [callback])
 
 Given a adminID, or an array of adminIDs, will set the admin status of the user(s) to `adminStatus`.
 
@@ -236,7 +237,7 @@ function editAdminsCallback(err) {
 ---------------------------------------
 
 <a name="changeArchivedStatus"></a>
-### api.changeArchivedStatus(threadOrThreads, archive, callback)
+### api.changeArchivedStatus(threadOrThreads, archive, [callback])
 
 Given a threadID, or an array of threadIDs, will set the archive status of the threads to `archive`. Archiving a thread will hide it from the logged-in user's inbox until the next time a message is sent or received.
 
@@ -263,7 +264,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeBlockedStatus"></a>
-### api.changeBlockedStatus(userID, block, callback)
+### api.changeBlockedStatus(userID, block, [callback])
 
 Prevents a user from privately contacting you. (Messages in a group chat will still be seen by both parties).
 
@@ -276,7 +277,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="changeGroupImage"></a>
-### api.changeGroupImage(image, threadID, callback)
+### api.changeGroupImage(image, threadID, [callback])
 
 Will change the group chat's image to the given image.
 
@@ -303,7 +304,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeNickname"></a>
-### api.changeNickname(nickname, threadID, participantID, callback)
+### api.changeNickname(nickname, threadID, participantID, [callback])
 
 Will change the thread user nickname to the one provided.
 
@@ -331,7 +332,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeThreadColor"></a>
-### api.changeThreadColor(color, threadID, callback)
+### api.changeThreadColor(color, threadID, [callback])
 
 Will change the thread color to the given hex string color ("#0000ff"). Set it
 to empty string if you want the default.
@@ -361,7 +362,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="changeThreadEmoji"></a>
-### api.changeThreadEmoji(emoji, threadID, callback)
+### api.changeThreadEmoji(emoji, threadID, [callback])
 
 Will change the thread emoji to the one provided.
 
@@ -390,7 +391,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="createNewGroup"></a>
-### api.createNewGroup(participantIDs, groupTitle, callback)
+### api.createNewGroup(participantIDs, groupTitle, [callback])
 
 Create a new group chat.
 
@@ -402,7 +403,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="createPoll"></a>
-### api.createPoll(title, threadID, options, callback) (*temporary deprecated because Facebook is updating this feature*)
+### api.createPoll(title, threadID, options, [callback]) (*temporary deprecated because Facebook is updating this feature*)
 
 Creates a poll with the specified title and optional poll options, which can also be initially selected by the logged-in user.
 
@@ -433,7 +434,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="deleteMessage"></a>
-### api.deleteMessage(messageOrMessages, callback)
+### api.deleteMessage(messageOrMessages, [callback])
 
 Takes a messageID or an array of messageIDs and deletes the corresponding message.
 
@@ -464,7 +465,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="deleteThread"></a>
-### api.deleteThread(threadOrThreads, callback)
+### api.deleteThread(threadOrThreads, [callback])
 
 Given a threadID, or an array of threadIDs, will delete the threads from your account. Note that this does *not* remove the messages from Facebook's servers - anyone who hasn't deleted the thread can still view all of the messages.
 
@@ -491,7 +492,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="forwardAttachment"></a>
-### api.forwardAttachment(attachmentID, userOrUsers, callback)
+### api.forwardAttachment(attachmentID, userOrUsers, [callback])
 
 Forwards corresponding attachment to given userID or to every user from an array of userIDs
 
@@ -552,7 +553,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="getFriendsList"></a>
-### api.getFriendsList(callback)
+### api.getFriendsList([callback])
 
 Returns an array of objects with some information about your friends.
 
@@ -579,8 +580,20 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 
 ---------------------------------------
 
+<a name="getMessage"></a>
+### api.getMessage(threadID, messageID, [callback])
+
+Returns message data from messageID
+
+__Arguments__
+
+* `threadID`: The ID of the thread you want to get the message from.
+* `messageID`: The ID of the message you want to get.
+* `callback(err, data)` - A callback called when the query is done.
+
+---------------------------------------
 <a name="getThreadHistory"></a>
-### api.getThreadHistory(threadID, amount, timestamp, callback)
+### api.getThreadHistory(threadID, amount, timestamp, [callback])
 
 Takes a threadID, number of messages, a timestamp, and a callback.
 
@@ -621,7 +634,7 @@ function loadNextThreadHistory(api){
 ---------------------------------------
 
 <a name="getThreadInfo"></a>
-### api.getThreadInfo(threadID, callback)
+### api.getThreadInfo(threadID, [callback])
 
 Takes a threadID and a callback.  Works for both single-user and group threads.
 
@@ -629,30 +642,30 @@ __Arguments__
 * `threadID`: A threadID corresponding to the target thread.
 * `callback(err, info)`: If `err` is `null`, `info` will contain the following properties:
 
-| Key   |      Description      |
-|:----------:|:-------------:|
-| threadID | ID of the thread |
-| participantIDs |    Array of user IDs in the thread   |
-| threadName | Name of the thread. Usually the name of the user. In group chats, this will be empty if the name of the group chat is unset. |
-| userInfo | An array contains info of members, which has the same structure as [`getUserInfo`](#getUserInfo), but add a key `id`, contain ID of member currently at. |
-| nicknames |    Map of nicknames for members of the thread. If there are no nicknames set, this will be `null`. Can be of the form: <ul><li>`{'123456789': "nickname"}`</ul></li> |
-| unreadCount | Number of unread messages |
-| messageCount | Number of messages |
-| imageSrc | URL to the group chat photo. `null` if unset or a 1-1 thread. |
-| timestamp | Timestamp of last activity |
-| muteUntil | Timestamp at which the thread will no longer be muted. The timestamp will be -1 if the thread is muted indefinitely or null if the thread is not muted. |
-| isGroup | boolean, true if this thread is a group thread (more than 2 participants). |
-| isSubscribed |  |
-| folder | The folder that the thread is in. Can be one of: `INBOX`, `ARCHIVED`, `PENDING` or `OTHER` |
-| isArchived | True if the thread is archived, false if not |
-| cannotReplyReason | If you cannot reply to this thread, this will be a string stating why. Otherwise it will be null. |
-| lastReadTimestamp | Timestamp of the last message that is marked as 'read' by the current user. |
-| emoji | Object with key 'emoji' whose value is the emoji unicode character. Null if unset. |
-| color | String form of the custom color in hexadecimal form. |
-| adminIDs | Array of user IDs of the admins of the thread. Empty array if unset. Can be of the form:<ul><li>`[{ id: '123456789' }]`</li></ul> |
-| approvalMode | `true` or `false`, used to check if this group requires admin approval to add users |
-| approvalQueue | Array of object that has the following keys: <ul><li>`inviterID`: ID of the user invited the person to the group</li><li>`requesterID`: ID of the person waiting to be approved</li><li>`timestamp`: Request timestamp</li></ul> |
-| inviteLink | Invite link for the thread. <ul><li>`enable`: `true` if the invite link is enabled, `false` if it is disabled</li> <li>`link`: Invite link</li></ul> |
+|        Key        |                                                                                                           Description                                                                                                            |
+| :---------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|     threadID      |                                                                                                         ID of the thread                                                                                                         |
+|  participantIDs   |                                                                                                 Array of user IDs in the thread                                                                                                  |
+|    threadName     |                                                   Name of the thread. Usually the name of the user. In group chats, this will be empty if the name of the group chat is unset.                                                   |
+|     userInfo      |                                     An array contains info of members, which has the same structure as [`getUserInfo`](#getUserInfo), but add a key `id`, contain ID of member currently at.                                     |
+|     nicknames     |                                Map of nicknames for members of the thread. If there are no nicknames set, this will be `null`. Can be of the form: <ul><li>`{'123456789': "nickname"}`</ul></li>                                 |
+|    unreadCount    |                                                                                                    Number of unread messages                                                                                                     |
+|   messageCount    |                                                                                                        Number of messages                                                                                                        |
+|     imageSrc      |                                                                                  URL to the group chat photo. `null` if unset or a 1-1 thread.                                                                                   |
+|     timestamp     |                                                                                                    Timestamp of last activity                                                                                                    |
+|     muteUntil     |                                     Timestamp at which the thread will no longer be muted. The timestamp will be -1 if the thread is muted indefinitely or null if the thread is not muted.                                      |
+|      isGroup      |                                                                            boolean, true if this thread is a group thread (more than 2 participants).                                                                            |
+|   isSubscribed    |                                                                                                                                                                                                                                  |
+|      folder       |                                                                    The folder that the thread is in. Can be one of: `INBOX`, `ARCHIVED`, `PENDING` or `OTHER`                                                                    |
+|    isArchived     |                                                                                           True if the thread is archived, false if not                                                                                           |
+| cannotReplyReason |                                                                If you cannot reply to this thread, this will be a string stating why. Otherwise it will be null.                                                                 |
+| lastReadTimestamp |                                                                           Timestamp of the last message that is marked as 'read' by the current user.                                                                            |
+|       emoji       |                                                                        Object with key 'emoji' whose value is the emoji unicode character. Null if unset.                                                                        |
+|       color       |                                                                                       String form of the custom color in hexadecimal form.                                                                                       |
+|     adminIDs      |                                                Array of user IDs of the admins of the thread. Empty array if unset. Can be of the form:<ul><li>`[{ id: '123456789' }]`</li></ul>                                                 |
+|   approvalMode    |                                                                       `true` or `false`, used to check if this group requires admin approval to add users                                                                        |
+|   approvalQueue   | Array of object that has the following keys: <ul><li>`inviterID`: ID of the user invited the person to the group</li><li>`requesterID`: ID of the person waiting to be approved</li><li>`timestamp`: Request timestamp</li></ul> |
+|    inviteLink     |                                       Invite link for the thread. <ul><li>`enable`: `true` if the invite link is enabled, `false` if it is disabled</li> <li>`link`: Invite link</li></ul>                                       |
 
 `accountType` is one of the following:
 - `"User"`
@@ -663,7 +676,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="getThreadList"></a>
-### api.getThreadList(limit, timestamp, tags, callback)
+### api.getThreadList(limit, timestamp, tags, [callback])
 
 Returns information about the user's threads.
 
@@ -867,17 +880,17 @@ __Arguments__
 
 In a case that some account type is not supported, we return just this *(but you can't rely on it)* and log a warning to the console:
 
-| Key          | Description             |
-|--------------|-------------------------|
-| accountType  | type, can be anything   |
-| userID       | ID of the account       |
-| name         | Name of the account     |
+| Key         | Description           |
+| ----------- | --------------------- |
+| accountType | type, can be anything |
+| userID      | ID of the account     |
+| name        | Name of the account   |
 
 
 ---------------------------------------
 
 <a name="getThreadPictures"></a>
-### api.getThreadPictures(threadID, offset, limit, callback)
+### api.getThreadPictures(threadID, offset, limit, [callback])
 
 Returns pictures sent in the thread.
 
@@ -891,7 +904,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="getUserID"></a>
-### api.getUserID(name, callback)
+### api.getUserID(name, [callback])
 
 Given the full name or vanity name of a Facebook user, event, page, group or app, the call will perform a Facebook Graph search and return all corresponding IDs (order determined by Facebook).
 
@@ -923,7 +936,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="getUserInfo"></a>
-### api.getUserInfo(ids, callback)
+### api.getUserInfo(ids, [callback])
 
 Will get some information about the given users.
 
@@ -959,29 +972,85 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ### api.threadColors
 
 A dictionary mapping names of all currently valid thread themes to their theme ID that are accepted by [`api.changeThreadColor`](#changeThreadColor). These themes, listed below, are the ones present in the palette UI used for selecting thread themes on the Messenger client.
+<details>
+<summary><b>List of colors:</b></summary>
+<br>
 
-- DefaultBlue: `196241301102133`
-- HotPink: `169463077092846`
-- AquaBlue: `2442142322678320`
-- BrightPurple: `234137870477637`
-- CoralPink: `980963458735625`
-- Orange: `175615189761153`
-- Green: `2136751179887052`
-- LavenderPurple: `2058653964378557`
-- Red: `2129984390566328`
-- Yellow: `174636906462322`
-- TealBlue: `1928399724138152`
-- Aqua: `417639218648241`
-- Mango: `930060997172551`
-- Berry: `164535220883264`
-- Citrus: `370940413392601`
-- Candy: `205488546921017`
-- ~~StarWars: `809305022860427`~~ (Facebook removed it.)
+- MessengerBlue:   `196241301102133`
+- Viking:          `1928399724138152`
+- GoldenPoppy:     `174636906462322`
+- RadicalRed:      `2129984390566328`
+- Shocking:        `2058653964378557`
+- FreeSpeechGreen: `2136751179887052`
+- Pumpkin:         `175615189761153`
+- LightCoral:      `980963458735625`
+- MediumSlateBlue: `234137870477637`
+- DeepSkyBlue:     `2442142322678320`
+- BrilliantRose:   `169463077092846`
+- DefaultBlue:     `196241301102133`
+- HotPink:         `169463077092846`
+- AquaBlue:        `2442142322678320`
+- BrightPurple:    `234137870477637`
+- CoralPink:       `980963458735625`
+- Orange:          `175615189761153`
+- Green:           `2136751179887052`
+- LavenderPurple:  `2058653964378557`
+- Red:             `2129984390566328`
+- Yellow:          `174636906462322`
+- TealBlue:        `1928399724138152`
+- Aqua:            `417639218648241`
+- Mango:           `930060997172551`
+- Berry:           `164535220883264`
+- Citrus:          `370940413392601`
+- Candy:           `205488546921017`
+- Earth:           `1833559466821043`
+- Support:         `365557122117011`
+- Music:           `339021464972092`
+- Pride:           `1652456634878319`
+- DoctorStrange:   `538280997628317`
+- LoFi:            `1060619084701625`
+- Sky:             `3190514984517598`
+- LunarNewYear:    `357833546030778`
+- Celebration:     `627144732056021`
+- Chill:           `390127158985345`
+- StrangerThings:  `1059859811490132`
+- Dune:            `1455149831518874`
+- Care:            `275041734441112`
+- Astrology:       `3082966625307060`
+- JBalvin:         `184305226956268`
+- Birthday:        `621630955405500`
+- Cottagecore:     `539927563794799`
+- Ocean:           `736591620215564`
+- Love:            `741311439775765`
+- TieDye:          `230032715012014`
+- Monochrome:      `788274591712841`
+- Default:         `3259963564026002`
+- Rocket:          `582065306070020`
+- Berry2:          `724096885023603`
+- Candy2:          `624266884847972`
+- Unicorn:         `273728810607574`
+- Tropical:        `262191918210707`
+- Maple:           `2533652183614000`
+- Sushi:           `909695489504566`
+- Citrus2:         `557344741607350`
+- Lollipop:        `280333826736184`
+- Shadow:          `271607034185782`
+- Rose:            `1257453361255152`
+- Lavender:        `571193503540759`
+- Tulip:           `2873642949430623`
+- Classic:         `3273938616164733`
+- Peach:           `3022526817824329`
+- Honey:           `672058580051520`
+- Kiwi:            `3151463484918004`
+- Grape:           `193497045377796`
+- NonBinary:       `737761000603635`
+- ~~StarWars:      `809305022860427`~~ (Facebook removed it.)
+</details>
 
 ---------------------------------------
 
 <a name="handleMessageRequest"></a>
-### api.handleMessageRequest(threadID, accept, callback)
+### api.handleMessageRequest(threadID, accept, [callback])
 
 Accept or ignore message request(s) with thread id `threadID`.
 
@@ -994,7 +1063,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="httpGet"></a>
-### api.httpGet(url, form, customHeader, callback, notAPI)
+### api.httpGet(url, form, [customHeader], [callback], [notAPI])
 
 Get data from a URL with method GET.
 
@@ -1009,7 +1078,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="httpPost"></a>
-### api.httpPost(url, form, customHeader, callback, notAPI)
+### api.httpPost(url, form, [customHeader], [callback], [notAPI])
 
 Get data from a URL with method POST.
 
@@ -1020,7 +1089,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="httpPostFormData"></a>
-### api.httpPostFormData(url, form, customHeader, callback, notAPI)
+### api.httpPostFormData(url, form, [customHeader], [callback], [notAPI])
 
 Post form data to a URL.
 
@@ -1031,9 +1100,9 @@ __Arguments__
 ---------------------------------------
 
 <a name="listen"></a>
-### api.listen([callback])
+### ~~api.listen([callback])~~
 <a name="listenMqtt"></a>
-### api.listenMqtt(callback)
+### api.listenMqtt([callback])
 
 Will call `callback` when a new message is received on this account.
 By default this won't receive events (joining/leaving a chat, title change etc...) but it can be activated with `api.setOptions({listenEvents: true})`.  This will by default ignore messages sent by the current account, you can enable listening to your own messages with `api.setOptions({selfListen: true})`. This returns an `EventEmitter` that contains function `stopListening` that will stop the `listen` loop and is guaranteed to prevent any future calls to the callback given to `listen`. An immediate call to `stopListening` when an error occurs will prevent the listen function to continue.
@@ -1313,16 +1382,16 @@ __Attachments__
 
 Similar to how messages can vary based on their `type`, so too can the `attachments` within `"message"` events. Each attachment will consist of an object of one of the following types:
 
-| Attachment Type | Fields |
-| --------------- | ------ |
-| `"sticker"` | `ID`, `url`, `packID`, `spriteUrl`, `spriteUrl2x`, `width`, `height`, `caption`, `description`, `frameCount`, `frameRate`, `framesPerRow`, `framesPerCol` |
-| `"file"` | `ID`, `filename`, `url`, `isMalicious`, `contentType` |
-| `"photo"` | `ID`, `filename`, `thumbnailUrl`, `previewUrl`, `previewWidth`, `previewHeight`, `largePreviewUrl`, `largePreviewWidth`, `largePreviewHeight` |
-| `"animated_image"` | `ID`, `filename`, `previewUrl`, `previewWidth`, `previewHeight`, `url`, `width`, `height` |
-| `"video"` | `ID`, `filename`, `previewUrl`, `previewWidth`, `previewHeight`, `url`, `width`, `height`, `duration`, `videoType` |
-| `"audio"` | `ID`, `filename`, `audioType`, `duration`, `url`, `isVoiceMail` |
-| `"location"` | `ID`, `latitude`, `longitude`, `image`, `width`, `height`, `url`, `address` |
-| `"share"` | `ID`, `url`, `title`, `description`, `source`, `image`, `width`, `height`, `playable`, `duration`, `playableUrl`, `subattachments`, `properties` |
+| Attachment Type    | Fields                                                                                                                                                    |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"sticker"`        | `ID`, `url`, `packID`, `spriteUrl`, `spriteUrl2x`, `width`, `height`, `caption`, `description`, `frameCount`, `frameRate`, `framesPerRow`, `framesPerCol` |
+| `"file"`           | `ID`, `filename`, `url`, `isMalicious`, `contentType`                                                                                                     |
+| `"photo"`          | `ID`, `filename`, `thumbnailUrl`, `previewUrl`, `previewWidth`, `previewHeight`, `largePreviewUrl`, `largePreviewWidth`, `largePreviewHeight`             |
+| `"animated_image"` | `ID`, `filename`, `previewUrl`, `previewWidth`, `previewHeight`, `url`, `width`, `height`                                                                 |
+| `"video"`          | `ID`, `filename`, `previewUrl`, `previewWidth`, `previewHeight`, `url`, `width`, `height`, `duration`, `videoType`                                        |
+| `"audio"`          | `ID`, `filename`, `audioType`, `duration`, `url`, `isVoiceMail`                                                                                           |
+| `"location"`       | `ID`, `latitude`, `longitude`, `image`, `width`, `height`, `url`, `address`                                                                               |
+| `"share"`          | `ID`, `url`, `title`, `description`, `source`, `image`, `width`, `height`, `playable`, `duration`, `playableUrl`, `subattachments`, `properties`          |
 
 __Example__
 
@@ -1374,7 +1443,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="markAsDelivered"></a>
-### api.markAsDelivered(threadID, messageID, callback])
+### api.markAsDelivered(threadID, messageID, [callback]])
 
 Given a threadID and a messageID will mark that message as delivered. If a message is marked as delivered that tells facebook servers that it was recieved.
 
@@ -1407,7 +1476,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="markAsRead"></a>
-### api.markAsRead(threadID, [read, callback])
+### api.markAsRead(threadID, [read, [callback]])
 
 Given a threadID will mark all the unread messages in a thread as read. Facebook will take a couple of seconds to show that you've read the messages.
 
@@ -1447,14 +1516,14 @@ This function will mark all of messages in your inbox readed.
 ---------------------------------------
 
 <a name="markAsSeen"></a>
-### api.markAsSeen([seenTimestamp], callback)
+### api.markAsSeen([seenTimestamp], [callback])
 
 This function will mark your entire inbox as seen (don't be confused with read!).
 
 ---------------------------------------
 
 <a name="muteThread"></a>
-### api.muteThread(threadID, muteSeconds, callback)
+### api.muteThread(threadID, muteSeconds, [callback])
 
 Mute a chat for a period of time, or unmute a chat.
 
@@ -1485,7 +1554,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="removeUserFromGroup"></a>
-### api.removeUserFromGroup(userID, threadID, callback)
+### api.removeUserFromGroup(userID, threadID, [callback])
 
 Removes a user from a group chat.
 
@@ -1498,7 +1567,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="resolvePhotoUrl"></a>
-### api.resolvePhotoUrl(photoID, callback)
+### api.resolvePhotoUrl(photoID, [callback])
 
 Resolves the URL to the full-size photo, given its ID. This function is useful for retrieving the full-size photo URL
 of image attachments in messages, returned by [`api.getThreadHistory`](#getThreadHistory).
@@ -1511,7 +1580,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="searchForThread"></a>
-### api.searchForThread(name, callback)
+### api.searchForThread(name, [callback])
 
 > This part is outdated.
 > see #396
@@ -1525,7 +1594,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="sendMessage"></a>
-### api.sendMessage(message, threadID, callback, messageID)
+### api.sendMessage(message, threadID, [callback], messageID)
 
 Sends the given message to the threadID.
 
@@ -1625,7 +1694,7 @@ login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
 ---------------------------------------
 
 <a name="sendTypingIndicator"></a>
-### api.sendTypingIndicator(threadID, callback)
+### api.sendTypingIndicator(threadID, [callback])
 
 Sends a "USERNAME is typing" indicator to other members of the thread indicated by `threadID`. This indication will disappear after 30 second or when the `end` function is called. The `end` function is returned by `api.sendTypingIndicator`.
 
@@ -1637,7 +1706,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="setMessageReaction"></a>
-### api.setMessageReaction(reaction, messageID, callback, forceCustomReaction)
+### api.setMessageReaction(reaction, messageID, [callback], forceCustomReaction)
 
 Sets reaction on message
 
@@ -1650,17 +1719,17 @@ __Arguments__
 
 __Supported Emojis__
 
-|Emoji|Text|Unicode|Shortcuts|
-|---|---|---|---|
-|😍|`😍`|`\uD83D\uDE0D`|`:love:`, `:heart_eyes:`|
-|😆|`😆`|`\uD83D\uDE06`|`:haha:`, `:laughing:`|
-|😮|`😮`|`\uD83D\uDE2E`|`:wow:`, `:open_mouth:`|
-|😢|`😢`|`\uD83D\uDE22`|`:sad:`, `:cry:`|
-|😠|`😠`|`\uD83D\uDE20`|`:angry:`|
-|👍|`👍`|`\uD83D\uDC4D`|`:like:`, `:thumbsup:`|
-|👎|`👎`|`\uD83D\uDC4E`|`:dislike:`, `:thumbsdown:`|
-|❤|`❤`|`\u2764`|`:heart:`|
-|💗|`💗`|`\uD83D\uDC97`|`:glowingheart:`|
+| Emoji | Text | Unicode        | Shortcuts                   |
+| ----- | ---- | -------------- | --------------------------- |
+| 😍     | `😍`  | `\uD83D\uDE0D` | `:love:`, `:heart_eyes:`    |
+| 😆     | `😆`  | `\uD83D\uDE06` | `:haha:`, `:laughing:`      |
+| 😮     | `😮`  | `\uD83D\uDE2E` | `:wow:`, `:open_mouth:`     |
+| 😢     | `😢`  | `\uD83D\uDE22` | `:sad:`, `:cry:`            |
+| 😠     | `😠`  | `\uD83D\uDE20` | `:angry:`                   |
+| 👍     | `👍`  | `\uD83D\uDC4D` | `:like:`, `:thumbsup:`      |
+| 👎     | `👎`  | `\uD83D\uDC4E` | `:dislike:`, `:thumbsdown:` |
+| ❤     | `❤`  | `\u2764`       | `:heart:`                   |
+| 💗     | `💗`  | `\uD83D\uDC97` | `:glowingheart:`            |
 
 ---------------------------------------
 
@@ -1719,28 +1788,28 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 ---------------------------------------
 
 <a name="setPostReaction"></a>
-### api.setPostReaction(postID, type, callback)
+### api.setPostReaction(postID, type, [callback])
 __Arguments__
 
 * `postID`: id of the post to react.
 * `type`: A string reaction type or key reaction.
 * `callback(err, obj)`: A callback called when the query is done.
 
-|Key|Reaction Type|
-|---|---|
-|0|unlike|
-|1|like|
-|2|heart|
-|16|love|
-|4|haha|
-|3|wow|
-|7|sad|
-|8|angry|
+| Key | Reaction Type |
+| --- | ------------- |
+| 0   | unlike        |
+| 1   | like          |
+| 2   | heart         |
+| 16  | love          |
+| 4   | haha          |
+| 3   | wow           |
+| 7   | sad           |
+| 8   | angry         |
 
 ---------------------------------------
 
 <a name="setTitle"></a>
-### api.setTitle(newTitle, threadID, callback)
+### api.setTitle(newTitle, threadID, [callback])
 
 Sets the title of the group chat with thread id `threadID` to `newTitle`.
 
@@ -1755,7 +1824,7 @@ __Arguments__
 ---------------------------------------
 
 <a name="unsendMessage"></a>
-### api.unsendMessage(messageID, callback)
+### api.unsendMessage(messageID, [callback])
 
 Revokes a message from anyone that could see that message with `messageID`
 
