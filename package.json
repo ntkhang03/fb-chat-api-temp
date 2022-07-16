@@ -1,6 +1,6 @@
 {
   "name": "fb-chat-api",
-  "version": "10.4.8",
+  "version": "10.4.9",
   "description": "A Facebook chat API that doesn't rely on XMPP",
   "scripts": {
     "test": "mocha",
@@ -64,7 +64,9 @@
       "use-isnan": 0,
       "no-extra-semi": 1,
       "no-async-promise-executor": 0,
-      "no-unreachable": 1
+      "no-unreachable": 1,
+			"valid-typeof": 0,
+			"no-case-declarations": 0
     }
   }
 }
