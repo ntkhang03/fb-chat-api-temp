@@ -102,7 +102,7 @@ module.exports = function(_defaultFuncs, _api, _ctx) {
 		 * July 15, 2022
 		 * added by @NTKhang
 		 */
-		"NonBinary":      "737761000603635"
+		NonBinary:      "737761000603635"
     //StarWars:       "809305022860427" Removed.
   };
 };
