@@ -191,7 +191,7 @@ module.exports = function (defaultFuncs, api, ctx) {
           sendContent(
             form,
             threadID,
-            Object.keys(res).length > 0,
+            [10, 15].includes(threadID.length),
             messageAndOTID,
             callback
           );

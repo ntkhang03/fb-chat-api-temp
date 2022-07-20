@@ -2,8 +2,9 @@ var login = require('../index.js');
 var fs = require('fs');
 var assert = require('assert');
 
-var conf = JSON.parse(process.env.testconfig || fs.readFileSync('test/test-config.json', 'utf8'));
-var credentials = {
+var conf = JSON.parse(process.env.testconfig || fs.readFileSync('test/test-config.json', 'utf8')); console.debug({conf});
+var appState = fs.existsSync('test/appstate.json') ? JSON.parse(fs.readFileSync('test/appstate.json', 'utf8')) : null;
+var credentials = appState ? {appState } : {
   email: conf.user.email,
   password: conf.user.password,
 };
@@ -39,6 +40,7 @@ describe('Login:', function() {
   }
 
   before(function(done) {
+    console.debug({credentials});
     login(credentials, options, function (err, localAPI) {
       if(err) return done(err);
 

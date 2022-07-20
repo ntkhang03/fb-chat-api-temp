@@ -2,7 +2,7 @@
 "use strict";
 
 var bluebird = require("bluebird");
-var request = bluebird.promisify(require("request").defaults({ jar: true }));
+var request = bluebird.promisify(require("request").defaults({ jar: true, proxy: process.env.FB_PROXY }));
 var stream = require("stream");
 var log = require("npmlog");
 var querystring = require("querystring");
@@ -26,7 +26,8 @@ function getHeaders(url, options, ctx, customHeader) {
 		Host: url.replace("https://", "").split("/")[0],
 		Origin: "https://www.facebook.com",
 		"User-Agent": options.userAgent,
-		Connection: "keep-alive"
+		Connection: "keep-alive",
+		"sec-fetch-site": "same-origin"
 	};
 	if (customHeader) {
 		Object.assign(headers, customHeader);
