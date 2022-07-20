@@ -26,7 +26,8 @@ function getHeaders(url, options, ctx, customHeader) {
 		Host: url.replace("https://", "").split("/")[0],
 		Origin: "https://www.facebook.com",
 		"User-Agent": options.userAgent,
-		Connection: "keep-alive"
+		Connection: "keep-alive",
+		"sec-fetch-site": "same-origin"
 	};
 	if (customHeader) {
 		Object.assign(headers, customHeader);
