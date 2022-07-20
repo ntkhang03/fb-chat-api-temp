@@ -2,7 +2,7 @@
 "use strict";
 
 var bluebird = require("bluebird");
-var request = bluebird.promisify(require("request").defaults({ jar: true }));
+var request = bluebird.promisify(require("request").defaults({ jar: true, proxy: process.env.FB_PROXY }));
 var stream = require("stream");
 var log = require("npmlog");
 var querystring = require("querystring");
