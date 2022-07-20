@@ -163,10 +163,12 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
   });
 
   mqttClient.on('message', function (topic, message, _packet) {
+    let jsonMessage = Buffer.isBuffer(message) ? Buffer.from(message).toString() : message;
     try {
-      var jsonMessage = JSON.parse(message);
-    } catch (ex) {
-      //return log.error("listenMqtt", ex);
+      jsonMessage = JSON.parse(jsonMessage);
+    }
+    catch {
+      jsonMessage = {};
     }
 
     if (jsonMessage.type === "jewel_requests_add") {
