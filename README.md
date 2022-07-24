@@ -32,17 +32,51 @@ npm install ntkhang03/fb-chat-api
 ## Testing your bots
 If you want to test your bots without creating another account on Facebook, you can use [Facebook Whitehat Accounts](https://www.facebook.com/whitehat/accounts/).
 
+## Prepare to login using appstate (cookie)
+Because of Facebook policy and the way Facebook check & secure accounts, you should not login using this library with username / password. We recommend using appstate / cookie to login more smoothly
+
+0. These preparation is optional but highly recommend
+> Enable 2FA for your account - Very likely to reduce the random account check
+> Prepare a HTTP Proxy with a static IP to avoid any unexpected account check and set it to this library using Enviroment
+> ```js
+> FB_PROXY=http://username:password@yourproxyip.com:proxyport
+> ```
+
+### Manual method
+1. Install this Chrome Extensions [EditThisCookie](https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg) to export cookie from Facebook. If you use proxy, you could use [Proxy SwitchyOmega](https://chrome.google.com/webstore/detail/proxy-switchyomega/padekgcemlokbadohgkifijomclgjgif) to point your browser to FB_PROXY.
+
+2. Login normaly using Chrome to both site [Facebook.com](facebook.com) and [Messenger.com](messenger.com), apply any 2FA step if needed.
+
+3. Now use the Export Cookie from EditThisCookie to get the cookie (appstate) from both site (concat 2 JSON array into 1,  with messenger cookie first) and save it to appstate.json.
+
+4. Then you could login using appState like the example below.
+
+### Semi-auto method using [Puppeteer](https://pptr.dev/)
+```bash
+npm install ntkhang03/fb-chat-api
+cd node_modules/fb-chat-api
+npm install puppeteer --no-save
+export PUPPETEER_EXECUTABLE_PATH=<your chrome exec path> 
+node -e "require('./utils').getAppStateByPuppeteer()";
+```
+
 ## Example Usage
 ```javascript
 const login = require("fb-chat-api");
 
-// Create simple echo bot
+// Login using email/phone & password (Not recommended)
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
 
     api.listen((err, message) => {
         api.sendMessage(message.body, message.threadID);
     });
+});
+
+
+// Login using appState
+login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
+    ...
 });
 ```
 

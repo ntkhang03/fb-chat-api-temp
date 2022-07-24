@@ -1381,6 +1381,59 @@ function getAppState(jar) {
 		.concat(jar.getCookies("https://facebook.com"))
 		.concat(jar.getCookies("https://www.messenger.com"));
 }
+
+function getAppStateByPuppeteer() {
+	const fs = require("fs");
+	const puppeteer = require("puppeteer");
+
+	if (!process.env.PUPPETEER_EXECUTABLE_PATH) {
+		return console.log('WARNING: You must set enviroment PUPPETEER_EXECUTABLE_PATH to your Google Chrome\'s path to avoid Facebook security check.')
+	}
+
+	(async () => {
+		let appstate = [];
+
+		const browser = await puppeteer.launch({headless: false});
+		const page = await browser.newPage()
+		const navigationPromise = page.waitForNavigation({waitUntil: 'networkidle0'});
+
+		await page.goto('https://www.facebook.com/');
+
+		let defaultWaitOpt = {timeout: 10 * 60e3}
+
+		await page.waitForSelector('#email', defaultWaitOpt);
+		await page.evaluate(() => {
+			return alert('Please login manually to your account and navigate to Home Feed page after logged in.')
+		});
+		// await page.type('#email', email);
+		// await page.type('#pass', password);
+		// await page.click('button[name="login"]');
+
+		await page.waitForSelector('div[role=feed]', defaultWaitOpt);
+		await page.waitForTimeout(3e3);
+		let cookiesF = await page.cookies();
+	 	
+		await page.goto('https://www.messenger.com/');
+		await page.waitForSelector('[data-testid*="mw_message"]', defaultWaitOpt);
+		await page.waitForTimeout(3e3);
+
+		let cookiesM = await page.cookies();
+
+		let mapper = ({name: key, ...rest}) => ({key, ...rest});
+
+		appstate = appstate.concat(cookiesM.map(mapper));
+		appstate = appstate.concat(cookiesF.map(mapper));
+
+		fs.writeFileSync('appstate.json', JSON.stringify(appstate));
+
+		await page.evaluate(() => {
+			return alert('Cookies is saved at "appstate.json".')
+		});
+
+		await browser.close();
+	})();
+}
+
 module.exports = {
 	isReadableStream,
 	get,
@@ -1418,7 +1471,7 @@ module.exports = {
 	formatDate,
 	decodeClientPayload,
 	getAppState,
+	getAppStateByPuppeteer,
 	getAdminTextMessageType,
 	setProxy
 };
-
