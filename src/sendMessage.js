@@ -184,18 +184,8 @@ module.exports = function (defaultFuncs, api, ctx) {
       sendContent(form, threadID, false, messageAndOTID, callback);
     } else {
       if (utils.getType(isGroup) != "Boolean") {
-        api.getUserInfo(threadID, function (err, res) {
-          if (err) {
-            return callback(err);
-          }
-          sendContent(
-            form,
-            threadID,
-            [10, 15].includes(threadID.length),
-            messageAndOTID,
-            callback
-          );
-        });
+        // Removed the use of api.getUserInfo() in the old version to reduce account lockout
+				sendContent(form, threadID, threadID.toString().length < 16, messageAndOTID, callback);
       } else {
         sendContent(form, threadID, !isGroup, messageAndOTID, callback);
       }

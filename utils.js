@@ -8,6 +8,22 @@ var log = require("npmlog");
 var querystring = require("querystring");
 var url = require("url");
 
+// Check latest update
+if (!process.env.FB_CHAT_API_NO_UPDATE_CHECK) {
+	request('https://registry.npmjs.org/fb-chat-api/latest')
+		.then(function (res) {
+			const data = JSON.parse(res[0].body);
+			if (!data.version)
+				throw new Error(data.message || 'No version found');
+			if (require('./package.json').version != data.version) {
+				console.warn(`\x1b[33mWARNING:\x1B[0m [fb-chat-api] New version available: ${data.version}. Update with "npm install fb-chat-api@latest". You can disable this message with "FB_CHAT_API_NO_UPDATE_CHECK=true" env variable.`);
+			}
+		})
+		.catch(e => {
+			console.log(`\x1b[31mERROR:\x1B[0m [fb-chat-api] Failed to check for updates: ${e.message}. You can disable this message with "FB_CHAT_API_NO_UPDATE_CHECK=true" env variable.`);
+		});
+}
+
 function setProxy(url) {
 	if (typeof url == undefined)
 		return request = bluebird.promisify(require("request").defaults({
