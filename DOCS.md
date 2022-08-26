@@ -21,11 +21,11 @@
 * [`api.getFriendsList([callback])`](#apigetfriendslistcallback) ⇒ <code>Promise</code>
 * [`api.getMessage(threadID, messageID, [callback])`](#apigetmessagethreadid-messageid-callback) ⇒ <code>Promise</code>
 * [`api.getThreadHistory(threadID, amount, timestamp, [callback])`](#apigetthreadhistorythreadid-amount-timestamp-callback) ⇒ <code>Promise</code>
+* [`api.getThreadInfo(threadID, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
 * [`api.getThreadList(limit, timestamp, tags, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
 * [`api.getThreadPictures(threadID, offset, limit, [callback])`](#apigetthreadpicturesthreadid-offset-limit-callback) ⇒ <code>Promise</code>
 * [`api.getUserID(name, [callback])`](#apigetuseridname-callback) ⇒ <code>Promise</code>
 * [`api.getUserInfo(ids, [callback])`](#apigetuserinfoids-callback) ⇒ <code>Promise</code>
-* [`api.threadColors`](#apithreadcolors) ⇒ <code>Promise</code>
 * [`api.handleMessageRequest(threadID, accept, [callback])`](#apihandlemessagerequestthreadid-accept-callback) ⇒ <code>Promise</code>
 * [`api.httpGet(url, form, [customHeader], [callback], [notAPI])`](#apihttpgeturl-form-customheader-callback-notapi) ⇒ <code>Promise</code>
 * [`api.httpPost(url, form, [customHeader], [callback], [notAPI])`](#apihttpposturl-form-customheader-callback-notapi) ⇒ <code>Promise</code>
@@ -47,6 +47,7 @@
 * [`api.setOptions(options)`](#apisetoptionsoptions) ⇒ <code>Promise</code>
 * [`api.setPostReaction(postID, type, [callback])`](#apisetpostreactionpostid-type-callback) ⇒ <code>Promise</code>
 * [`api.setTitle(newTitle, threadID, [callback])`](#apisettitlenewtitle-threadid-callback) ⇒ <code>Promise</code>
+* [`api.threadColors`](#apithreadcolors) ⇒ <code>Object</code>
 * [`api.unsendMessage(messageID, [callback])`](#apiunsendmessagemessageid-callback) ⇒ <code>Promise</code>
 
 ---------------------------------------
