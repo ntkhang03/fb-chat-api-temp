@@ -803,6 +803,7 @@ module.exports = function (defaultFuncs, api, ctx) {
       listenMqtt(defaultFuncs, api, ctx, globalCallback);
     }
     ctx.firstListen = false;
+		api.stopListening = msgEmitter.stopListening;
     return msgEmitter;
   };
 };
