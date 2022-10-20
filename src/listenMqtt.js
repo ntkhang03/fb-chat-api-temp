@@ -304,7 +304,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
                   .otherUserFbId).toString(),
               messageID: delta.deltaMessageReaction.messageId,
               reaction: delta.deltaMessageReaction.reaction,
-              senderID: delta.deltaMessageReaction.senderId.toString(),
+              senderID: delta.deltaMessageReaction.senderId == 0 ? delta.deltaMessageReaction.userId.toString() : delta.deltaMessageReaction.senderId.toString(),
               userID: (delta.deltaMessageReaction.userId || delta.deltaMessageReaction.senderId).toString()
             });
           })();
@@ -803,6 +803,7 @@ module.exports = function (defaultFuncs, api, ctx) {
       listenMqtt(defaultFuncs, api, ctx, globalCallback);
     }
     ctx.firstListen = false;
+		api.stopListening = msgEmitter.stopListening;
     return msgEmitter;
   };
 };
