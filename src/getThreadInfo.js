@@ -31,7 +31,11 @@ function formatEventReminders(reminder) {
 }
 
 function formatThreadGraphQLResponse(data) {
-	var messageThread = data.o0.data.message_thread;
+	if (data.errors)
+		return data.errors;
+	const messageThread = data.message_thread;
+	if (!messageThread)
+		return null;
 	var threadID = messageThread.thread_key.thread_fbid
 		? messageThread.thread_key.thread_fbid
 		: messageThread.thread_key.other_user_id;
@@ -164,22 +168,28 @@ module.exports = function (defaultFuncs, api, ctx) {
 			};
 		}
 
+		if (utils.getType(threadID) !== "Array") {
+			threadID = [threadID];
+		}
+
+		var form = {};
 		// `queries` has to be a string. I couldn't tell from the dev console. This
 		// took me a really long time to figure out. I deserve a cookie for this.
-		var form = {
-			queries: JSON.stringify({
-				o0: {
-					// This doc_id is valid as of July 20th, 2020
-					doc_id: "3449967031715030",
-					query_params: {
-						id: threadID,
-						message_limit: 0,
-						load_messages: false,
-						load_read_receipts: false,
-						before: null
-					}
+		threadID.map(function (t, i) {
+			form["o" + i] = {
+				doc_id: "3449967031715030",
+				query_params: {
+					id: t,
+					message_limit: 0,
+					load_messages: false,
+					load_read_receipts: false,
+					before: null
 				}
-			}),
+			};
+		});
+
+		form = {
+			queries: JSON.stringify(form),
 			batch_name: "MessengerGraphQLThreadFetcher"
 		};
 
@@ -194,13 +204,23 @@ module.exports = function (defaultFuncs, api, ctx) {
 				// This returns us an array of things. The last one is the success /
 				// failure one.
 				// @TODO What do we do in this case?
-				if (resData[resData.length - 1].error_results !== 0) {
-					throw resData[0].o0.errors[0];
+				// if (resData[resData.length - 1].error_results !== 0) {
+				// 	throw resData[0].o0.errors[0];
+				// }
+				// if (!resData[0].o0.data.message_thread) {
+				// 	throw new Error("can't find this thread");
+				// }
+				const threadInfos = {};
+				for (let i = resData.length - 2; i >= 0; i--) {
+					const threadInfo = formatThreadGraphQLResponse(resData[i][Object.keys(resData[i])[0]].data);
+					threadInfos[threadInfo?.threadID || threadID[threadID.length - 1 - i]] = threadInfo;
 				}
-				if (!resData[0].o0.data.message_thread) {
-					throw new Error("can't find this thread");
+				if (Object.values(threadInfos).length == 1) {
+					callback(null, Object.values(threadInfos)[0]);
 				}
-				callback(null, formatThreadGraphQLResponse(resData[0]));
+				else {
+					callback(null, threadInfos);
+				}
 			})
 			.catch(function (err) {
 				log.error("getThreadInfoGraphQL", err);
