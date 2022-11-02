@@ -66,7 +66,7 @@ function formatMessage(threadID, data) {
 						logMessageBody: data.snippet,
 						timestamp: data.timestamp_precise,
 						author: data.message_sender.id
-					}
+					};
 				case "CHANGE_THREAD_ICON":
 					const thread_icon = data.extensible_message_admin_text.thread_icon;
 					return {
@@ -187,9 +187,9 @@ function formatMessage(threadID, data) {
 function parseDelta(threadID, delta) {
 	if (delta.replied_to_message) {
 		return Object.assign({
-			type: "message_reply",
+			type: "message_reply"
 		}, formatMessage(threadID, delta), {
-			messageReply: formatMessage(threadID, delta.replied_to_message),
+			messageReply: formatMessage(threadID, delta.replied_to_message.message)
 		});
 	}
 	else {
@@ -200,8 +200,19 @@ function parseDelta(threadID, delta) {
 
 module.exports = function (defaultFuncs, api, ctx) {
 	return function getMessage(threadID, messageID, callback) {
+		var resolveFunc = function () { };
+		var rejectFunc = function () { };
+		var returnPromise = new Promise(function (resolve, reject) {
+			resolveFunc = resolve;
+			rejectFunc = reject;
+		});
+
 		if (!callback) {
-			return callback({ error: "getMessage: need callback" });
+			callback = function (err, info) {
+				if (err)
+					return rejectFunc(err);
+				resolveFunc(info);
+			};
 		}
 
 		if (!threadID || !messageID) {
@@ -217,7 +228,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 					"query_params": {
 						"thread_and_message_id": {
 							"thread_id": threadID,
-							"message_id": messageID,
+							"message_id": messageID
 						}
 					}
 				}
@@ -237,15 +248,11 @@ module.exports = function (defaultFuncs, api, ctx) {
 				}
 
 				var fetchData = resData[0].o0.data.message;
-				console.log(JSON.stringify(fetchData, null, 2));
 				if (fetchData) {
-					(!ctx.globalOptions.selfListen &&
-						fetchData.message_sender.id.toString() === ctx.userID) ||
-						!ctx.loggedIn ?
-						undefined :
-						(function () {
-							callback(null, parseDelta(threadID, fetchData));
-						})();
+					callback(null, parseDelta(threadID, fetchData));
+				}
+				else {
+					throw fetchData;
 				}
 			})
 			.catch((err) => {
@@ -253,6 +260,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 				callback(err);
 			});
 
+		return returnPromise;
 	};
 };
 
