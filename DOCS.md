@@ -21,7 +21,7 @@
 * [`api.getFriendsList([callback])`](#apigetfriendslistcallback) ⇒ <code>Promise</code>
 * [`api.getMessage(threadID, messageID, [callback])`](#apigetmessagethreadid-messageid-callback) ⇒ <code>Promise</code>
 * [`api.getThreadHistory(threadID, amount, timestamp, [callback])`](#apigetthreadhistorythreadid-amount-timestamp-callback) ⇒ <code>Promise</code>
-* [`api.getThreadInfo(threadID, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
+* [`api.getThreadInfo(threadIDs, [callback])`](#apigetthreadinfothreadid-callback) ⇒ <code>Promise</code>
 * [`api.getThreadList(limit, timestamp, tags, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
 * [`api.getThreadPictures(threadID, offset, limit, [callback])`](#apigetthreadpicturesthreadid-offset-limit-callback) ⇒ <code>Promise</code>
 * [`api.getUserID(name, [callback])`](#apigetuseridname-callback) ⇒ <code>Promise</code>
@@ -635,13 +635,44 @@ function loadNextThreadHistory(api){
 ---------------------------------------
 
 <a name="getThreadInfo"></a>
-### api.getThreadInfo(threadID, [callback])
+### api.getThreadInfo(threadIDs, [callback])
 
 Takes a threadID and a callback.  Works for both single-user and group threads.
 
 __Arguments__
-* `threadID`: A threadID corresponding to the target thread.
-* `callback(err, info)`: If `err` is `null`, `info` will contain the following properties:
+* `threadIDs`: Either a string/number for one ID or an array of strings/numbers for a batched query.
+* `callback(err, info)`: If `err` is `null`, `info` will return
+<!-- * in nghiêng chữ -->
+*if `threadIDs` is an array of IDs, `info` will be an array of objects with the following fields:*
+```js
+{
+	"4000000000000000": {
+		threadID: "4000000000000000",
+		threadName: "Thread Name",
+		// ...
+		// thread info
+	},
+	"5000000000000000": {
+		threadID: "5000000000000000",
+		threadName: "Thread Name",
+		// ...
+		// thread info
+	},
+	// ...
+}
+```
+
+*if `threadIDs` is a single ID, `info` will be an object with the following fields:*
+```js
+{
+	threadID: "4000000000000000",
+	threadName: "Thread Name",
+	// ...
+	// thread info
+}
+```
+
+`info` will contain the following fields:
 
 |        Key        |                                                                                                           Description                                                                                                            |
 | :---------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
@@ -944,7 +975,21 @@ Will get some information about the given users.
 __Arguments__
 
 * `ids` - Either a string/number for one ID or an array of strings/numbers for a batched query.
-* `callback(err, obj)` - A callback called when the query is done (either with an error or with an confirmation object). `obj` is a mapping from userId to another object containing the following properties: `name`, `firstName`, `vanity` (user's chosen facebook handle, if any), `thumbSrc`, `profileUrl`, `gender`, `type` (type is generally user, group, page, event or app), `isFriend`, `isBirthday`, `searchTokens`, `alternateName`.
+* `callback(err, obj)` - A callback called when the query is done (either with an error or with an confirmation object). `obj` is a mapping from userId to another object containing the following properties: 
+
+| Key           | Description                                                        |
+| ------------- | ------------------------------------------------------------------ |
+| name          | Name of the user                                                   |
+| firstName     | First name of the user                                             |
+| vanity        | the username of the user if any                                    |
+| thumbSrc      | URL of the profile picture                                         |
+| profileUrl    | URL of the profile                                                 |
+| gender        | the gender of the user, with 1 is Female, 2 is Male, 0 is unknown  |
+| type          | type is generally user, group, page, event or app                  |
+| isFriend      | is the user a friend of the current user, either `true` or `false` |
+| isBirthday    | is the user having a birthday today, either `true` or `false`      |
+| searchTokens  | an array of strings that can be used to search for the user        |
+| alternateName |                                                                    |
 
 __Example__
 
