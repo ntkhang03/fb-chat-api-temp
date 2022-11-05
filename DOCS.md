@@ -21,7 +21,7 @@
 * [`api.getFriendsList([callback])`](#apigetfriendslistcallback) ⇒ <code>Promise</code>
 * [`api.getMessage(threadID, messageID, [callback])`](#apigetmessagethreadid-messageid-callback) ⇒ <code>Promise</code>
 * [`api.getThreadHistory(threadID, amount, timestamp, [callback])`](#apigetthreadhistorythreadid-amount-timestamp-callback) ⇒ <code>Promise</code>
-* [`api.getThreadInfo(threadIDs, [callback])`](#apigetthreadinfothreadid-callback) ⇒ <code>Promise</code>
+* [`api.getThreadInfo(threadIDs, [callback])`](#apigetthreadinfothreadids-callback) ⇒ <code>Promise</code>
 * [`api.getThreadList(limit, timestamp, tags, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
 * [`api.getThreadPictures(threadID, offset, limit, [callback])`](#apigetthreadpicturesthreadid-offset-limit-callback) ⇒ <code>Promise</code>
 * [`api.getUserID(name, [callback])`](#apigetuseridname-callback) ⇒ <code>Promise</code>
