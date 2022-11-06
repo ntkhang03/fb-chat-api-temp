@@ -675,6 +675,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
     case "ThreadName":
     case "ParticipantsAddedToGroupThread":
     case "ParticipantLeftGroupThread":
+		case "ApprovalQueue":
       var formattedEvent;
       try {
         formattedEvent = utils.formatDeltaEvent(v.delta);

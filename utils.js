@@ -912,6 +912,16 @@ function formatDeltaEvent(m) {
 			logMessageType = "log:unsubscribe";
 			logMessageData = { leftParticipantFbId: m.leftParticipantFbId };
 			break;
+		case "ApprovalQueue":
+			logMessageType = "log:approval-queue";
+			logMessageData = {
+				approvalQueue: {
+					action: m.action,
+					recipientFbId: m.recipientFbId,
+					requestSource: m.requestSource,
+					...m.messageMetadata
+				}
+			};
 	}
 
 	return {
