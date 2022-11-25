@@ -102,7 +102,19 @@ module.exports = function(_defaultFuncs, _api, _ctx) {
 		 * July 15, 2022
 		 * added by @NTKhang
 		 */
-		NonBinary:      "737761000603635"
-    //StarWars:       "809305022860427" Removed.
+		NonBinary:      "737761000603635", 
+
+		/**
+		 * November 25, 2022
+		 * added by @NTKhang
+		 */
+		 ThankfulForFriends: 	 "1318983195536293",
+		 Transgender:					 "504518465021637",
+		 TaylorSwift: 				 "769129927636836",
+		 NationalComingOutDay: "788102625833584",
+		 Autumn: 							 "822549609168155",
+		 Cyberpunk2077: 			 "780962576430091"
+
+    //StarWars:       "809305022860427" Removed by Facebook.
   };
 };
