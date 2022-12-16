@@ -27,7 +27,7 @@ if (!process.env.FB_CHAT_API_NO_UPDATE_CHECK) {
 function setProxy(url) {
 	if (typeof url == undefined)
 		return request = bluebird.promisify(require("request").defaults({
-			jar: true,
+			jar: true
 		}));
 	return request = bluebird.promisify(require("request").defaults({
 		jar: true,
@@ -318,7 +318,7 @@ function _formatAttachment(attachment1, attachment2) {
 
 	attachment2 = attachment2 || { id: "", image_data: {} };
 	attachment1 = attachment1.mercury || attachment1;
-	var blob = attachment1.blob_attachment;
+	var blob = attachment1.blob_attachment || attachment1.sticker_attachment;
 	var type =
 		blob && blob.__typename ? blob.__typename : attachment1.attach_type;
 	if (!type && attachment1.sticker_attachment) {
@@ -579,12 +579,13 @@ function _formatAttachment(attachment1, attachment2) {
 				isVoiceMail: blob.is_voicemail
 			};
 		case "StickerAttachment":
+		case "Sticker":
 			return {
 				type: "sticker",
 				ID: blob.id,
 				url: blob.url,
 
-				packID: blob.pack.id,
+				packID: blob.pack ? blob.pack.id : null,
 				spriteUrl: blob.sprite_image,
 				spriteUrl2x: blob.sprite_image_2x,
 				width: blob.width,
@@ -1006,7 +1007,7 @@ function getFrom(str, startToken, endToken) {
 }
 
 function makeParsable(html) {
-	let withoutForLoop = html.replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, "");
+	const withoutForLoop = html.replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, "");
 
 	// (What the fuck FB, why windows style newlines?)
 	// So sometimes FB will send us base multiple objects in the same response.
@@ -1017,7 +1018,7 @@ function makeParsable(html) {
 	// It turns out that Facebook may insert random number of spaces before
 	// next object begins (issue #616)
 	//       rav_kr - 2018-03-19
-	let maybeMultipleObjects = withoutForLoop.split(/\}\r\n *\{/);
+	const maybeMultipleObjects = withoutForLoop.split(/\}\r\n *\{/);
 	if (maybeMultipleObjects.length === 1) return maybeMultipleObjects;
 
 	return "[" + maybeMultipleObjects.join("},{") + "]";
