@@ -10,13 +10,13 @@ var url = require("url");
 
 // Check latest update
 if (!process.env.FB_CHAT_API_NO_UPDATE_CHECK) {
-	request('https://registry.npmjs.org/fb-chat-api/latest')
+	request('https://raw.githubusercontent.com/ntkhang03/fb-chat-api/master/package.json')
 		.then(function (res) {
 			const data = JSON.parse(res[0].body);
 			if (!data.version)
 				throw new Error(data.message || 'No version found');
 			if (require('./package.json').version != data.version) {
-				console.warn(`\x1b[33mWARNING:\x1B[0m [fb-chat-api] New version available: ${data.version}. Update with "npm install fb-chat-api@latest". You can disable this message with "FB_CHAT_API_NO_UPDATE_CHECK=true" env variable.`);
+				console.warn(`\x1b[33mWARNING:\x1B[0m [fb-chat-api] New version available: ${data.version}. Update with "npm install ntkhang03/fb-chat-api". You can disable this message with "FB_CHAT_API_NO_UPDATE_CHECK=true" env variable.`);
 			}
 		})
 		.catch(e => {
