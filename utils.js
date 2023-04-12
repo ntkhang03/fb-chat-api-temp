@@ -20,6 +20,7 @@ if (!process.env.FB_CHAT_API_NO_UPDATE_CHECK) {
 			}
 		})
 		.catch(e => {
+			
 			console.log(`\x1b[31mERROR:\x1B[0m [fb-chat-api] Failed to check for updates: ${e.message}. You can disable this message with "FB_CHAT_API_NO_UPDATE_CHECK=true" env variable.`);
 		});
 }
