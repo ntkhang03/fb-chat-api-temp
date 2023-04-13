@@ -321,6 +321,19 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 							timestamp: delta.deltaRecallMessageData.timestamp
 						});
 					})();
+				} else if (delta.deltaRemoveMessage && !!ctx.globalOptions.listenEvents) {
+					(function () {
+						globalCallback(null, {
+							type: "message_self_delete",
+							threadID: (delta.deltaRemoveMessage.threadKey.threadFbId ?
+								delta.deltaRemoveMessage.threadKey.threadFbId : delta.deltaRemoveMessage.threadKey
+									.otherUserFbId).toString(),
+							messageID: delta.deltaRemoveMessage.messageIds.length == 1 ? delta.deltaRemoveMessage.messageIds[0] : delta.deltaRemoveMessage.messageIds,
+							senderID: api.getCurrentUserID(),
+							deletionTimestamp: delta.deltaRemoveMessage.deletionTimestamp,
+							timestamp: delta.deltaRemoveMessage.timestamp
+						});
+					})();
 				} else if (delta.deltaMessageReply) {
 					//Mention block - #1
 					var mdata =
