@@ -106,7 +106,10 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 		log.error("listenMqtt", err);
 		mqttClient.end();
 		if (ctx.globalOptions.autoReconnect) {
-			getSeqID();
+			getSeqID()
+				.catch(() => {
+					listenMqtt(defaultFuncs, api, ctx, globalCallback);
+				});
 		} else {
 			globalCallback({
 				type: "stop_listen",
@@ -760,6 +763,9 @@ module.exports = function (defaultFuncs, api, ctx) {
 					ctx.loggedIn = false;
 				}
 				throw err;
+			})
+			.catch((err) => {
+				listenMqtt(defaultFuncs, api, ctx, globalCallback);
 			});
 	};
 
@@ -813,7 +819,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 
 		if (!ctx.firstListen || !ctx.lastSeqId) {
 			getSeqID()
-				.catch((err) => {
+				.catch(() => {
 					listenMqtt(defaultFuncs, api, ctx, globalCallback);
 				});
 		} else {
