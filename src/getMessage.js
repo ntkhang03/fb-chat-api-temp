@@ -5,8 +5,8 @@
  * @author https://github.com/Schmavery/facebook-chat-api/pull/865
  */
 
-var utils = require("../utils");
-var log = require("npmlog");
+const utils = require("../utils");
+const log = require("npmlog");
 
 
 function formatMessage(threadID, data) {
@@ -140,7 +140,7 @@ function formatMessage(threadID, data) {
 				})),
 				attachments: data.blob_attachments && data.blob_attachments.length > 0 ?
 					data.blob_attachments.length.map(att => {
-						var x;
+						let x;
 						try {
 							x = utils._formatAttachment(att);
 						} catch (ex) {
@@ -200,9 +200,9 @@ function parseDelta(threadID, delta) {
 
 module.exports = function (defaultFuncs, api, ctx) {
 	return function getMessage(threadID, messageID, callback) {
-		var resolveFunc = function () { };
-		var rejectFunc = function () { };
-		var returnPromise = new Promise(function (resolve, reject) {
+		let resolveFunc = function () { };
+		let rejectFunc = function () { };
+		const returnPromise = new Promise(function (resolve, reject) {
 			resolveFunc = resolve;
 			rejectFunc = reject;
 		});
@@ -247,7 +247,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 					throw { error: "getMessage: there was no successful_results", res: resData };
 				}
 
-				var fetchData = resData[0].o0.data.message;
+				const fetchData = resData[0].o0.data.message;
 				if (fetchData) {
 					callback(null, parseDelta(threadID, fetchData));
 				}

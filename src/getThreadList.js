@@ -31,13 +31,13 @@ function formatEventReminders(reminder) {
 }
 
 function formatThreadGraphQLResponse(messageThread) {
-	var threadID = messageThread.thread_key.thread_fbid
+	const threadID = messageThread.thread_key.thread_fbid
 		? messageThread.thread_key.thread_fbid
 		: messageThread.thread_key.other_user_id;
 
 	// Remove me
-	var lastM = messageThread.last_message;
-	var snippetID =
+	const lastM = messageThread.last_message;
+	const snippetID =
 		lastM &&
 			lastM.nodes &&
 			lastM.nodes[0] &&
@@ -45,10 +45,10 @@ function formatThreadGraphQLResponse(messageThread) {
 			lastM.nodes[0].message_sender.messaging_actor
 			? lastM.nodes[0].message_sender.messaging_actor.id
 			: null;
-	var snippetText =
+	const snippetText =
 		lastM && lastM.nodes && lastM.nodes[0] ? lastM.nodes[0].snippet : null;
-	var lastR = messageThread.last_read_receipt;
-	var lastReadTimestamp =
+	const lastR = messageThread.last_read_receipt;
+	const lastReadTimestamp =
 		lastR && lastR.nodes && lastR.nodes[0] && lastR.nodes[0].timestamp_precise
 			? lastR.nodes[0].timestamp_precise
 			: null;
@@ -170,9 +170,9 @@ module.exports = function (defaultFuncs, api, ctx) {
 			throw { error: "getThreadList: tags must be an array" };
 		}
 
-		var resolveFunc = function () { };
-		var rejectFunc = function () { };
-		var returnPromise = new Promise(function (resolve, reject) {
+		let resolveFunc = function () { };
+		let rejectFunc = function () { };
+		const returnPromise = new Promise(function (resolve, reject) {
 			resolveFunc = resolve;
 			rejectFunc = reject;
 		});

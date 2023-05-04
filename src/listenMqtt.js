@@ -1,17 +1,17 @@
 /* eslint-disable no-redeclare */
 "use strict";
-var utils = require("../utils");
-var log = require("npmlog");
-var mqtt = require('mqtt');
-var websocket = require('websocket-stream');
-var HttpsProxyAgent = require('https-proxy-agent');
+const utils = require("../utils");
+const log = require("npmlog");
+const mqtt = require('mqtt');
+const websocket = require('websocket-stream');
+const HttpsProxyAgent = require('https-proxy-agent');
 const EventEmitter = require('events');
 
-var identity = function () { };
-var form = {};
-var getSeqID = function () { };
+const identity = function () { };
+let form = {};
+let getSeqID = function () { };
 
-var topics = [
+const topics = [
 	"/legacy_web",
 	"/webrtc",
 	"/rtc_multi",
@@ -27,23 +27,24 @@ var topics = [
 	"/orca_presence",
 	//Will receive /sr_res right here.
 
-	//"/inbox",
-	//"/mercury",
-	//"/messaging_events",
-	//"/orca_message_notifications",
-	//"/pp",
-	//"/webrtc_response",
+	"/legacy_web_mtouch"
+	// "/inbox",
+	// "/mercury",
+	// "/messaging_events",
+	// "/orca_message_notifications",
+	// "/pp",
+	// "/webrtc_response",
 ];
 
 function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 	//Don't really know what this does but I think it's for the active state?
 	//TODO: Move to ctx when implemented
-	var chatOn = ctx.globalOptions.online;
-	var foreground = false;
+	const chatOn = ctx.globalOptions.online;
+	const foreground = false;
 
-	var sessionID = Math.floor(Math.random() * 9007199254740991) + 1;
-	var username = {
-		u: ctx.userID,
+	const sessionID = Math.floor(Math.random() * 9007199254740991) + 1;
+	const username = {
+		u: ctx.i_userID || ctx.userID,
 		s: sessionID,
 		chat_on: chatOn,
 		fg: foreground,
@@ -59,11 +60,13 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 		dc: "",
 		no_auto_fg: true,
 		gas: null,
-		pack: []
+		pack: [],
+		a: ctx.globalOptions.userAgent,
+		aids: null
 	};
-	var cookies = ctx.jar.getCookies("https://www.facebook.com").join("; ");
+	const cookies = ctx.jar.getCookies("https://www.facebook.com").join("; ");
 
-	var host;
+	let host;
 	if (ctx.mqttEndpoint) {
 		host = `${ctx.mqttEndpoint}&sid=${sessionID}`;
 	} else if (ctx.region) {
@@ -72,7 +75,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 		host = `wss://edge-chat.facebook.com/chat?sid=${sessionID}`;
 	}
 
-	var options = {
+	const options = {
 		clientId: "mqttwsclient",
 		protocolId: 'MQIsdp',
 		protocolVersion: 3,
@@ -94,22 +97,19 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 	};
 
 	if (typeof ctx.globalOptions.proxy != "undefined") {
-		var agent = new HttpsProxyAgent(ctx.globalOptions.proxy);
+		const agent = new HttpsProxyAgent(ctx.globalOptions.proxy);
 		options.wsOptions.agent = agent;
 	}
 
 	ctx.mqttClient = new mqtt.Client(_ => websocket(host, options.wsOptions), options);
 
-	var mqttClient = ctx.mqttClient;
+	const mqttClient = ctx.mqttClient;
 
 	mqttClient.on('error', function (err) {
-		log.error("listenMqtt", err);
+		// log.error("listenMqtt", err);
 		mqttClient.end();
 		if (ctx.globalOptions.autoReconnect) {
-			getSeqID()
-				.catch(() => {
-					listenMqtt(defaultFuncs, api, ctx, globalCallback);
-				});
+			getSeqID();
 		} else {
 			globalCallback({
 				type: "stop_listen",
@@ -118,18 +118,42 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 		}
 	});
 
+	mqttClient.on('close', function () {
+		mqttClient.end();
+		defaultFuncs
+			.post("https://www.facebook.com/api/graphqlbatch/", ctx.jar, form)
+			.then(utils.parseAndCheckLogin(ctx, defaultFuncs))
+			.then((resData) => {
+				if (utils.getType(resData) != "Array") {
+					throw {
+						error: "Not logged in",
+						res: resData
+					};
+				}
+
+				globalCallback("Connection closed.");
+			})
+			.catch((err) => {
+				// log.error("listenMqtt", err);
+				if (utils.getType(err) == "Object" && (err.error === "Not logged in" || err.error === "Not logged in.")) {
+					ctx.loggedIn = false;
+				}
+				return globalCallback(err);
+			});
+	});
+
 	mqttClient.on('connect', function () {
 		topics.forEach(function (topicsub) {
 			mqttClient.subscribe(topicsub);
 		});
 
-		var topic;
-		var queue = {
+		let topic;
+		const queue = {
 			sync_api_version: 10,
 			max_deltas_able_to_process: 1000,
 			delta_batch_size: 500,
 			encoding: "JSON",
-			entity_fbid: ctx.userID
+			entity_fbid: ctx.i_userID || ctx.userID
 		};
 
 		if (ctx.syncToken) {
@@ -143,14 +167,12 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 		}
 
 		mqttClient.publish(topic, JSON.stringify(queue), { qos: 1, retain: false });
-
 		// set status online
 		// fix by NTKhang
 		mqttClient.publish("/foreground_state", JSON.stringify({ foreground: chatOn }), { qos: 1 });
-
 		mqttClient.publish("/set_client_settings", JSON.stringify({ make_user_available_when_in_foreground: true }), { qos: 1 });
 
-		var rTimeout = setTimeout(function () {
+		const rTimeout = setTimeout(function () {
 			mqttClient.end();
 			getSeqID();
 		}, 5000);
@@ -170,7 +192,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 		try {
 			jsonMessage = JSON.parse(jsonMessage);
 		}
-		catch {
+		catch (e) {
 			jsonMessage = {};
 		}
 
@@ -179,14 +201,14 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 				type: "friend_request_received",
 				actorFbId: jsonMessage.from.toString(),
 				timestamp: Date.now().toString()
-			})
+			});
 		}
 		else if (jsonMessage.type === "jewel_requests_remove_old") {
 			globalCallback(null, {
 				type: "friend_request_cancel",
 				actorFbId: jsonMessage.from.toString(),
 				timestamp: Date.now().toString()
-			})
+			});
 		}
 		else if (topic === "/t_ms") {
 			if (ctx.tmsWait && typeof ctx.tmsWait == "function") {
@@ -203,12 +225,12 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 			}
 
 			//If it contains more than 1 delta
-			for (var i in jsonMessage.deltas) {
-				var delta = jsonMessage.deltas[i];
+			for (const i in jsonMessage.deltas) {
+				const delta = jsonMessage.deltas[i];
 				parseDelta(defaultFuncs, api, ctx, globalCallback, { "delta": delta });
 			}
 		} else if (topic === "/thread_typing" || topic === "/orca_typing_notifications") {
-			var typ = {
+			const typ = {
 				type: "typ",
 				isTyping: !!jsonMessage.state,
 				from: jsonMessage.sender_fbid.toString(),
@@ -217,11 +239,11 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 			(function () { globalCallback(null, typ); })();
 		} else if (topic === "/orca_presence") {
 			if (!ctx.globalOptions.updatePresence) {
-				for (var i in jsonMessage.list) {
-					var data = jsonMessage.list[i];
-					var userID = data["u"];
+				for (const i in jsonMessage.list) {
+					const data = jsonMessage.list[i];
+					const userID = data["u"];
 
-					var presence = {
+					const presence = {
 						type: "presence",
 						userID: userID.toString(),
 						//Convert to ms
@@ -235,10 +257,6 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 
 	});
 
-	mqttClient.on('close', function () {
-		globalCallback("Connection closed.");
-		//client.end();
-	});
 }
 
 function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
@@ -251,7 +269,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 
 		(function resolveAttachmentUrl(i) {
 			if (i == v.delta.attachments.length) {
-				var fmtMsg;
+				let fmtMsg;
 				try {
 					fmtMsg = utils.formatDeltaMessage(v);
 				} catch (err) {
@@ -268,7 +286,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 					}
 				}
 				return !ctx.globalOptions.selfListen &&
-					fmtMsg.senderID === ctx.userID ?
+					(fmtMsg.senderID === ctx.i_userID || fmtMsg.senderID === ctx.userID) ?
 					undefined :
 					(function () { globalCallback(null, fmtMsg); })();
 			} else {
@@ -291,11 +309,12 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 	}
 
 	if (v.delta.class == "ClientPayload") {
-		var clientPayload = utils.decodeClientPayload(
+		const clientPayload = utils.decodeClientPayload(
 			v.delta.payload
 		);
+
 		if (clientPayload && clientPayload.deltas) {
-			for (var i in clientPayload.deltas) {
+			for (const i in clientPayload.deltas) {
 				var delta = clientPayload.deltas[i];
 				if (delta.deltaMessageReaction && !!ctx.globalOptions.listenEvents) {
 					(function () {
@@ -337,27 +356,28 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 							timestamp: delta.deltaRemoveMessage.timestamp
 						});
 					})();
-				} else if (delta.deltaMessageReply) {
+				}
+				else if (delta.deltaMessageReply) {
 					//Mention block - #1
-					var mdata =
+					let mdata =
 						delta.deltaMessageReply.message === undefined ? [] :
 							delta.deltaMessageReply.message.data === undefined ? [] :
 								delta.deltaMessageReply.message.data.prng === undefined ? [] :
 									JSON.parse(delta.deltaMessageReply.message.data.prng);
-					var m_id = mdata.map(u => u.i);
-					var m_offset = mdata.map(u => u.o);
-					var m_length = mdata.map(u => u.l);
+					let m_id = mdata.map(u => u.i);
+					let m_offset = mdata.map(u => u.o);
+					let m_length = mdata.map(u => u.l);
 
-					var mentions = {};
+					const mentions = {};
 
-					for (var i = 0; i < m_id.length; i++) {
+					for (let i = 0; i < m_id.length; i++) {
 						mentions[m_id[i]] = (delta.deltaMessageReply.message.body || "").substring(
 							m_offset[i],
 							m_offset[i] + m_length[i]
 						);
 					}
 					//Mention block - 1#
-					var callbackToReturn = {
+					const callbackToReturn = {
 						type: "message_reply",
 						threadID: (delta.deltaMessageReply.message.messageMetadata.threadKey.threadFbId ?
 							delta.deltaMessageReply.message.messageMetadata.threadKey.threadFbId : delta.deltaMessageReply.message.messageMetadata.threadKey
@@ -365,11 +385,11 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 						messageID: delta.deltaMessageReply.message.messageMetadata.messageId,
 						senderID: delta.deltaMessageReply.message.messageMetadata.actorFbId.toString(),
 						attachments: delta.deltaMessageReply.message.attachments.map(function (att) {
-							var mercury = JSON.parse(att.mercuryJSON);
+							const mercury = JSON.parse(att.mercuryJSON);
 							Object.assign(att, mercury);
 							return att;
 						}).map(att => {
-							var x;
+							let x;
 							try {
 								x = utils._formatAttachment(att);
 							} catch (ex) {
@@ -396,9 +416,9 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 						m_offset = mdata.map(u => u.o);
 						m_length = mdata.map(u => u.l);
 
-						var rmentions = {};
+						const rmentions = {};
 
-						for (var i = 0; i < m_id.length; i++) {
+						for (let i = 0; i < m_id.length; i++) {
 							rmentions[m_id[i]] = (delta.deltaMessageReply.repliedToMessage.body || "").substring(
 								m_offset[i],
 								m_offset[i] + m_length[i]
@@ -412,11 +432,11 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 							messageID: delta.deltaMessageReply.repliedToMessage.messageMetadata.messageId,
 							senderID: delta.deltaMessageReply.repliedToMessage.messageMetadata.actorFbId.toString(),
 							attachments: delta.deltaMessageReply.repliedToMessage.attachments.map(function (att) {
-								var mercury = JSON.parse(att.mercuryJSON);
+								const mercury = JSON.parse(att.mercuryJSON);
 								Object.assign(att, mercury);
 								return att;
 							}).map(att => {
-								var x;
+								let x;
 								try {
 									x = utils._formatAttachment(att);
 								} catch (ex) {
@@ -458,10 +478,10 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 									throw { error: "forcedFetch: there was no successful_results", res: resData };
 								}
 
-								var fetchData = resData[0].o0.data.message;
+								const fetchData = resData[0].o0.data.message;
 
-								var mobj = {};
-								for (var n in fetchData.message.ranges) {
+								const mobj = {};
+								for (const n in fetchData.message.ranges) {
 									mobj[fetchData.message.ranges[n].entity.id] = (fetchData.message.text || "").substr(fetchData.message.ranges[n].offset, fetchData.message.ranges[n].length);
 								}
 
@@ -470,7 +490,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 									messageID: fetchData.message_id,
 									senderID: fetchData.message_sender.id.toString(),
 									attachments: fetchData.message.blob_attachment.map(att => {
-										var x;
+										let x;
 										try {
 											x = utils._formatAttachment({
 												blob_attachment: att
@@ -496,7 +516,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 									markDelivery(ctx, api, callbackToReturn.threadID, callbackToReturn.messageID);
 								}
 								!ctx.globalOptions.selfListen &&
-									callbackToReturn.senderID === ctx.userID ?
+									(callbackToReturn.senderID === ctx.i_userID || callbackToReturn.senderID === ctx.userID) ?
 									undefined :
 									(function () { globalCallback(null, callbackToReturn); })();
 							});
@@ -509,7 +529,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 					}
 
 					return !ctx.globalOptions.selfListen &&
-						callbackToReturn.senderID === ctx.userID ?
+						(callbackToReturn.senderID === ctx.i_userID || callbackToReturn.senderID === ctx.userID) ?
 						undefined :
 						(function () { globalCallback(null, callbackToReturn); })();
 				}
@@ -595,13 +615,13 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 							throw { error: "forcedFetch: there was no successful_results", res: resData };
 						}
 
-						var fetchData = resData[0].o0.data.message;
+						const fetchData = resData[0].o0.data.message;
 
 						if (utils.getType(fetchData) == "Object") {
 							log.info("forcedFetch", fetchData);
 							switch (fetchData.__typename) {
 								case "ThreadImageMessage":
-									(!ctx.globalOptions.selfListenEvent && fetchData.message_sender.id.toString() === ctx.userID) || !ctx.loggedIn ?
+									(!ctx.globalOptions.selfListenEvent && (fetchData.message_sender.id.toString() === ctx.i_userID || fetchData.message_sender.id.toString() === ctx.userID)) || !ctx.loggedIn ?
 										undefined :
 										(function () {
 											globalCallback(null, {
@@ -703,7 +723,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 					type: "parse_error"
 				});
 			}
-			return (!ctx.globalOptions.selfListenEvent && formattedEvent.author.toString() === ctx.userID) || !ctx.loggedIn ?
+			return (!ctx.globalOptions.selfListenEvent && (formattedEvent.author.toString() === ctx.i_userID || formattedEvent.author.toString() === ctx.userID)) || !ctx.loggedIn ?
 				undefined :
 				(function () { globalCallback(null, formattedEvent); })();
 	}
@@ -713,12 +733,12 @@ function markDelivery(ctx, api, threadID, messageID) {
 	if (threadID && messageID) {
 		api.markAsDelivered(threadID, messageID, (err) => {
 			if (err) {
-				//log.error("markAsDelivered", err);
+				log.error("markAsDelivered", err);
 			} else {
 				if (ctx.globalOptions.autoMarkRead) {
 					api.markAsRead(threadID, (err) => {
 						if (err) {
-							//log.error("markAsDelivered", err);
+							log.error("markAsDelivered", err);
 						}
 					});
 				}
@@ -728,7 +748,7 @@ function markDelivery(ctx, api, threadID, messageID) {
 }
 
 module.exports = function (defaultFuncs, api, ctx) {
-	var globalCallback = identity;
+	let globalCallback = identity;
 	getSeqID = function getSeqID() {
 		ctx.t_mqttCalled = false;
 		return defaultFuncs
@@ -736,10 +756,10 @@ module.exports = function (defaultFuncs, api, ctx) {
 			.then(utils.parseAndCheckLogin(ctx, defaultFuncs))
 			.then((resData) => {
 				if (utils.getType(resData) != "Array") {
-					throw {
-						error: "Not logged in",
-						res: resData
-					};
+					const err = new Error("Not logged in");
+					err.res = resData;
+					err.error = "Not logged in";
+					throw err;
 				}
 
 				if (resData && resData[resData.length - 1].error_results > 0) {
@@ -754,18 +774,19 @@ module.exports = function (defaultFuncs, api, ctx) {
 					ctx.lastSeqId = resData[0].o0.data.viewer.message_threads.sync_sequence_id;
 					listenMqtt(defaultFuncs, api, ctx, globalCallback);
 				} else {
-					throw { error: "getSeqId: no sync_sequence_id found.", res: resData };
+					const err = new Error("No sync_sequence_id found.");
+					err.res = resData;
+					err.error = "getSeqId: no sync_sequence_id found.";
+					throw err;
 				}
 			})
 			.catch((err) => {
-				//log.error("getSeqId", err);
-				if (utils.getType(err) == "Object" && err.error === "Not logged in") {
+				// log.error("getSeqId", err);
+				if (utils.getType(err) == "Object" && (err.error === "Not logged in" || err.error === "Not logged in.")) {
 					ctx.loggedIn = false;
 				}
+				// return globalCallback(err);
 				throw err;
-			})
-			.catch((err) => {
-				listenMqtt(defaultFuncs, api, ctx, globalCallback);
 			});
 	};
 
@@ -785,9 +806,17 @@ module.exports = function (defaultFuncs, api, ctx) {
 					});
 				}
 			}
+
+			async stopListeningSync() {
+				return new Promise((resolve) => {
+					this.stopListening((...data) => {
+						resolve(data);
+					});
+				});
+			}
 		}
 
-		var msgEmitter = new MessageEmitter();
+		const msgEmitter = new MessageEmitter();
 		globalCallback = (callback || function (error, message) {
 			if (error) {
 				return msgEmitter.emit("error", error);
@@ -827,6 +856,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 		}
 		ctx.firstListen = false;
 		api.stopListening = msgEmitter.stopListening;
+		api.stopListeningSync = msgEmitter.stopListeningSync;
 		return msgEmitter;
 	};
 };

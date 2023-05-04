@@ -1,7 +1,7 @@
 "use strict";
 
-var utils = require("../utils");
-var log = require("npmlog");
+const utils = require("../utils");
+const log = require("npmlog");
 
 function formatEventReminders(reminder) {
 	return {
@@ -36,13 +36,13 @@ function formatThreadGraphQLResponse(data) {
 	const messageThread = data.message_thread;
 	if (!messageThread)
 		return null;
-	var threadID = messageThread.thread_key.thread_fbid
+	const threadID = messageThread.thread_key.thread_fbid
 		? messageThread.thread_key.thread_fbid
 		: messageThread.thread_key.other_user_id;
 
 	// Remove me
-	var lastM = messageThread.last_message;
-	var snippetID =
+	const lastM = messageThread.last_message;
+	const snippetID =
 		lastM &&
 			lastM.nodes &&
 			lastM.nodes[0] &&
@@ -50,10 +50,10 @@ function formatThreadGraphQLResponse(data) {
 			lastM.nodes[0].message_sender.messaging_actor
 			? lastM.nodes[0].message_sender.messaging_actor.id
 			: null;
-	var snippetText =
+	const snippetText =
 		lastM && lastM.nodes && lastM.nodes[0] ? lastM.nodes[0].snippet : null;
-	var lastR = messageThread.last_read_receipt;
-	var lastReadTimestamp =
+	const lastR = messageThread.last_read_receipt;
+	const lastReadTimestamp =
 		lastR && lastR.nodes && lastR.nodes[0] && lastR.nodes[0].timestamp_precise
 			? lastR.nodes[0].timestamp_precise
 			: null;
@@ -152,9 +152,9 @@ function formatThreadGraphQLResponse(data) {
 
 module.exports = function (defaultFuncs, api, ctx) {
 	return function getThreadInfoGraphQL(threadID, callback) {
-		var resolveFunc = function () { };
-		var rejectFunc = function () { };
-		var returnPromise = new Promise(function (resolve, reject) {
+		let resolveFunc = function () { };
+		let rejectFunc = function () { };
+		const returnPromise = new Promise(function (resolve, reject) {
 			resolveFunc = resolve;
 			rejectFunc = reject;
 		});
@@ -172,7 +172,7 @@ module.exports = function (defaultFuncs, api, ctx) {
 			threadID = [threadID];
 		}
 
-		var form = {};
+		let form = {};
 		// `queries` has to be a string. I couldn't tell from the dev console. This
 		// took me a really long time to figure out. I deserve a cookie for this.
 		threadID.map(function (t, i) {

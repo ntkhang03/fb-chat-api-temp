@@ -2,6 +2,7 @@
 ### You can use callback or .then() .catch() or async/await
 
 * [`login(credentials, options, [callback])`](#logincredentials-options-callback) ⇒ <code>Promise</code>
+* [`api.addExternalModule(moduleObj)`](#apiaddexternalmodulemoduleobj)
 * [`api.addUserToGroup(userID, threadID, [callback])`](#apiaddusertogroupuserid-threadid-callback) ⇒ <code>Promise</code>
 * [`api.changeAdminStatus(threadID, adminIDs, adminStatus, [callback])`](#apichangeadminstatusthreadid-adminids-adminstatus-callback) ⇒ <code>Promise</code>
 * [`api.changeArchivedStatus(threadOrThreads, archive, [callback])`](#apichangearchivedstatusthreadorthreads-archive-callback) ⇒ <code>Promise</code>
@@ -49,6 +50,7 @@
 * [`api.setTitle(newTitle, threadID, [callback])`](#apisettitlenewtitle-threadid-callback) ⇒ <code>Promise</code>
 * [`api.threadColors`](#apithreadcolors) ⇒ <code>Object</code>
 * [`api.unsendMessage(messageID, [callback])`](#apiunsendmessagemessageid-callback) ⇒ <code>Promise</code>
+* [`api.uploadAttachment(attachments, [callback])`](#apiuploadattachmentattachments-callback) ⇒ <code>Promise</code>
 
 ---------------------------------------
 
@@ -107,8 +109,12 @@ __Arguments__
 * `credentials`: An object containing the fields `email` and `password` used to login, __*or*__ an object containing the field `appState`.
 * `options`: An object representing options to use when logging in (as described in [api.setOptions](#setOptions)).
 * `callback(err, api)`: A callback called when login is done (successful or not). `err` is an object containing a field `error`.
+---
 
-__Example (Email & Password)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
+<h1><b>Now login with account and password is no longer available, <a href="#loginWithAppstate">use appState</a> login instead.</b></h1>
+
+
+~~__Example (Email & Password)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)~~
 
 ```js
 const login = require("fb-chat-api");
@@ -119,7 +125,7 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 });
 ```
 
-__Example (Email & Password then save appState to file)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
+~~__Example (Email & Password then save appState to file)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)~~
 
 ```js
 const fs = require("fs-extra");
@@ -133,7 +139,7 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 ```
 
 
-__Login Approvals (2-Factor Auth)__: When you try to login with Login Approvals enabled, your callback will be called with an error `'login-approval'` that has a `continue` function that accepts the approval code as a `string` or a `number`. (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
+~~__Login Approvals (2-Factor Auth)__: When you try to login with Login Approvals enabled, your callback will be called with an error `'login-approval'` that has a `continue` function that accepts the approval code as a `string` or a `number`. (it is no longer usable, please use [this](#loginWithAppstate) alternative method)~~
 
 __Example__:
 
@@ -187,6 +193,24 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 
 ---------------------------------------
 
+<a name="apiaddexternalmodulemoduleobj"></a>
+### api.addExternalModule(moduleObj)
+
+This function is used to add external modules to the api object, each module is a function that takes 3 arguments: `defaultFuncs`, `api`, `ctx` and returns a function that will be added to the api object.
+
+Example:
+```js
+api.addExternalModule({
+	"example": function(defaultFuncs, api, ctx) {
+		return function () {
+			console.log("globalOptions", ctx.globalOptions);
+		};
+	}
+});
+```
+
+---------------------------------------
+
 <a name="addUserToGroup"></a>
 ### api.addUserToGroup(userID, threadID, [callback])
 
@@ -197,6 +221,16 @@ __Arguments__
 * `userID`: User ID or array of user IDs.
 * `threadID`: Group chat ID.
 * `callback(err)`: A callback called when the query is done (either with an error or with no arguments).
+
+__Example__
+
+```js
+api.addUserToGroup("1234567890", "0987654321", (err) => {
+	if(err)
+		return console.error(err);
+	console.log("Added user to group.");
+});
+```
 
 ---------------------------------------
 
@@ -1882,3 +1916,32 @@ __Arguments__
 * `callback(err)`: A callback called when the query is done (with an error or with null).
 
 ---------------------------------------
+
+<a name="uploadAttachments"></a>
+### api.uploadAttachment(attachments, [callback])
+This function is used to upload attachments to Facebook. It is used internally by [api.sendMessage](#apisendmessagemessage-threadid-callback-messageid).
+
+__Arguments__
+<!--  readable stream or an array of readable streams. -->
+* `attachments`: A readable stream or an array of readable streams to upload.
+* `callback(err, info)`: A callback called when the upload is done (either with an error or with the uploaded file info).
+
+__Example__
+
+```js
+const fs = require("fs-extra");
+const login = require("fb-chat-api");
+login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
+    if(err) return console.error(err);
+
+    // Send a local file as a stream
+		const iamgeOne = fs.createReadStream(__dirname + '/image.jpg');
+		const iamgeTwo = fs.createReadStream(__dirname + '/image2.jpg');
+
+		api.uploadAttachment([iamgeOne, iamgeTwo], (err, attachments) => {
+				if(err)
+					return console.error(err);
+					
+				console.log(attachments);
+		});
+});
