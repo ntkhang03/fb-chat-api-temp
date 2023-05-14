@@ -3,6 +3,7 @@
 const utils = require("./utils");
 const cheerio = require("cheerio");
 const log = require("npmlog");
+let request = require("request");
 
 let checkVerified = null;
 
@@ -236,8 +237,20 @@ function buildAPI(globalOptions, html, jar) {
   return [ctx, defaultFuncs, api];
 }
 
+function requestWithPromise(options) {
+  return new Promise(function( resolve, reject ) {
+    request(options, function ( error, response, body ) {
+      if ( error ) return reject( error )
+      try {
+        resolve( response )
+      } catch ( error ) {
+        reject( error )
+      }})
+  });
+}
+
 function makeLogin(jar, email, password, loginOptions, callback, prCallback) {
-  return function (res) {
+  return function (res, err) {
     const html = res.body;
     const $ = cheerio.load(html);
     let arr = [];
@@ -252,16 +265,11 @@ function makeLogin(jar, email, password, loginOptions, callback, prCallback) {
     });
 
     const form = utils.arrToForm(arr);
-    form.lsd = utils.getFrom(html, "[\"LSD\",[],{\"token\":\"", "\"}");
-    form.lgndim = Buffer.from("{\"w\":1440,\"h\":900,\"aw\":1440,\"ah\":834,\"c\":24}").toString('base64');
+    form.lsd = $('input[name=lsd]').val();
     form.email = email;
     form.pass = password;
-    form.default_persistent = '0';
-    form.lgnrnd = utils.getFrom(html, "name=\"lgnrnd\" value=\"", "\"");
     form.locale = 'en_US';
     form.timezone = '240';
-    form.lgnjs = ~~(Date.now() / 1000);
-
 
     // Getting cookies from the HTML page... (kill me now plz)
     // we used to get a bunch of cookies in the headers of the response of the
@@ -280,10 +288,21 @@ function makeLogin(jar, email, password, loginOptions, callback, prCallback) {
     // ---------- Very Hacky Part Ends -----------------
 
     log.info("login", "Logging in...");
-    return utils
-      .post("https://www.facebook.com/login/device-based/regular/login/?login_attempt=1&lwv=110", jar, form, loginOptions)
-      .then(utils.saveCookies(jar))
-      .then(function (res) {
+    let loginPromise = requestWithPromise({
+        url: "https://www.facebook.com/login/",
+        method: 'POST',
+        jar: jar,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
+          'sec-fetch-site': 'same-origin',
+          'origin': 'https://www.facebook.com',
+          'referer': 'https://www.facebook.com/',
+          'upgrade-insecure-requests': '1',
+        },
+        form: form
+      });
+    return loginPromise.then((res, err) => {
         const headers = res.headers;
         if (!headers.location) {
           throw { error: "Wrong username/password." };
@@ -506,15 +525,20 @@ function loginHelper(appState, email, password, globalOptions, callback, prCallb
   } else {
     // Open the main page, then we login with the given credentials and finally
     // load the main page again (it'll give us some IDs that we need)
-    mainPromise = utils
-      .get("https://www.facebook.com/", null, null, globalOptions, { noRef: true })
-      .then(utils.saveCookies(jar))
-      .then(makeLogin(jar, email, password, globalOptions, callback, prCallback))
-      .then(function () {
-        return utils
-          .get('https://www.facebook.com/', jar, null, globalOptions)
-          .then(utils.saveCookies(jar));
-      });
+    mainPromise = requestWithPromise({
+        method: 'GET',
+        url: "https://www.facebook.com",
+        jar: true,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
+        }
+      })
+        .then(makeLogin(jar, email, password, globalOptions, callback, prCallback))
+        .then(function () {
+          return utils
+            .get('https://www.facebook.com/', jar, null, globalOptions)
+            .then(utils.saveCookies(jar));
+        });
   }
 
   let ctx = null;
