@@ -117,7 +117,7 @@ __Arguments__
 ~~__Example (Email & Password)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)~~
 
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -129,7 +129,7 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -144,7 +144,7 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 __Example__:
 
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 const readline = require("readline");
 
 var rl = readline.createInterface({
@@ -182,7 +182,7 @@ __Review Recent Login__: Sometimes Facebook will ask you to review your recent l
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -249,7 +249,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if (err) return console.error(err);
@@ -285,7 +285,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -325,7 +325,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -353,7 +353,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -383,7 +383,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -412,7 +412,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -452,7 +452,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -480,7 +480,7 @@ __Arguments__
 __Example__
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -513,7 +513,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -570,7 +570,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -600,7 +600,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -983,7 +983,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1029,7 +1029,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1477,7 +1477,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 // Simple echo bot. He'll repeat anything that you say.
 // Will stop when you say '/stop'
@@ -1572,7 +1572,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1617,7 +1617,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1705,7 +1705,7 @@ __Tip__: to find your own ID, you can look inside the cookies. The `userID` is u
 __Example (Basic Message)__
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1719,7 +1719,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 __Example (File upload)__
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1736,7 +1736,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 
 __Example (Mention)__
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -1760,7 +1760,7 @@ login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
 
 __Example (Location)__
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
     var yourID = "000000000000000";
@@ -1842,7 +1842,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 // Simple echo bot. This will send messages forever.
 
@@ -1930,7 +1930,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
 	if (err)
 		return console.error(err);
