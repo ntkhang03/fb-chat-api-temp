@@ -741,7 +741,6 @@ function formatDeltaMessage(m) {
 			m_offset[i] + m_length[i]
 		);
 	}
-
 	return {
 		type: "message",
 		senderID: formatID(md.actorFbId.toString()),
@@ -753,7 +752,8 @@ function formatDeltaMessage(m) {
 		attachments: (m.delta.attachments || []).map(v => _formatAttachment(v)),
 		mentions: mentions,
 		timestamp: md.timestamp,
-		isGroup: !!md.threadKey.threadFbId
+		isGroup: !!md.threadKey.threadFbId,
+		participantIDs: m.delta.participants || (md.cid ? md.cid.canonicalParticipantFbids : []) || []
 	};
 }
 
@@ -922,7 +922,8 @@ function formatDeltaEvent(m) {
 		logMessageData: logMessageData,
 		logMessageBody: m.messageMetadata.adminText,
 		timestamp: m.messageMetadata.timestamp,
-		author: m.messageMetadata.actorFbId
+		author: m.messageMetadata.actorFbId,
+		participantIDs: (m.participants || []).map(p => p.toString())
 	};
 }
 
@@ -1259,6 +1260,19 @@ function parseAndCheckLogin(ctx, defaultFuncs, retryCount) {
 	};
 }
 
+function checkLiveCookie(ctx, defaultFuncs) {
+	return defaultFuncs
+		.get("https://m.facebook.com/me", ctx.jar)
+		.then(function (res) {
+			if (res.body.indexOf(ctx.i_userID || ctx.userID) === -1) {
+				const err = new Error("Not logged in.");
+				err.error = "Not logged in.";
+				throw err;
+			}
+			return true;
+		});
+}
+
 function saveCookies(jar) {
 	return function (res) {
 		const cookies = res.headers["set-cookie"] || [];
@@ -1431,6 +1445,7 @@ module.exports = {
 	decodeClientPayload,
 	getAppState,
 	getAdminTextMessageType,
-	setProxy
+	setProxy,
+	checkLiveCookie
 };
 

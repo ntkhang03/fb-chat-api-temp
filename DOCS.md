@@ -1932,16 +1932,17 @@ __Example__
 const fs = require("fs-extra");
 const login = require("fb-chat-api");
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
-    if(err) return console.error(err);
+	if (err)
+		return console.error(err);
 
-    // Send a local file as a stream
-		const iamgeOne = fs.createReadStream(__dirname + '/image.jpg');
-		const iamgeTwo = fs.createReadStream(__dirname + '/image2.jpg');
+	// Send a local file as a stream
+	const iamgeOne = fs.createReadStream(__dirname + '/image.jpg');
+	const iamgeTwo = fs.createReadStream(__dirname + '/image2.jpg');
 
-		api.uploadAttachment([iamgeOne, iamgeTwo], (err, attachments) => {
-				if(err)
-					return console.error(err);
-					
-				console.log(attachments);
-		});
+	api.uploadAttachment([iamgeOne, iamgeTwo], (err, attachments) => {
+		if(err)
+			return console.error(err);
+			
+		console.log(attachments);
+	});
 });

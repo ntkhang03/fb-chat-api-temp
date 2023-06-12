@@ -8,8 +8,6 @@ const HttpsProxyAgent = require('https-proxy-agent');
 const EventEmitter = require('events');
 
 const identity = function () { };
-let form = {};
-let getSeqID = function () { };
 
 const topics = [
 	"/legacy_web",
@@ -109,7 +107,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 		// log.error("listenMqtt", err);
 		mqttClient.end();
 		if (ctx.globalOptions.autoReconnect) {
-			getSeqID();
+			listenMqtt(defaultFuncs, api, ctx, globalCallback);
 		} else {
 			globalCallback({
 				type: "stop_listen",
@@ -119,27 +117,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 	});
 
 	mqttClient.on('close', function () {
-		mqttClient.end();
-		defaultFuncs
-			.post("https://www.facebook.com/api/graphqlbatch/", ctx.jar, form)
-			.then(utils.parseAndCheckLogin(ctx, defaultFuncs))
-			.then((resData) => {
-				if (utils.getType(resData) != "Array") {
-					throw {
-						error: "Not logged in",
-						res: resData
-					};
-				}
 
-				globalCallback("Connection closed.");
-			})
-			.catch((err) => {
-				// log.error("listenMqtt", err);
-				if (utils.getType(err) == "Object" && (err.error === "Not logged in" || err.error === "Not logged in.")) {
-					ctx.loggedIn = false;
-				}
-				return globalCallback(err);
-			});
 	});
 
 	mqttClient.on('connect', function () {
@@ -174,7 +152,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 
 		const rTimeout = setTimeout(function () {
 			mqttClient.end();
-			getSeqID();
+			listenMqtt(defaultFuncs, api, ctx, globalCallback);
 		}, 5000);
 
 		ctx.tmsWait = function () {
@@ -185,6 +163,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 			}) : "";
 			delete ctx.tmsWait;
 		};
+
 	});
 
 	mqttClient.on('message', function (topic, message, _packet) {
@@ -268,7 +247,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 			return;
 
 		(function resolveAttachmentUrl(i) {
-			if (i == v.delta.attachments.length) {
+			if (i == (v.delta.attachments || []).length) {
 				let fmtMsg;
 				try {
 					fmtMsg = utils.formatDeltaMessage(v);
@@ -315,7 +294,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 
 		if (clientPayload && clientPayload.deltas) {
 			for (const i in clientPayload.deltas) {
-				var delta = clientPayload.deltas[i];
+				const delta = clientPayload.deltas[i];
 				if (delta.deltaMessageReaction && !!ctx.globalOptions.listenEvents) {
 					(function () {
 						globalCallback(null, {
@@ -402,7 +381,8 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 						body: delta.deltaMessageReply.message.body || "",
 						isGroup: !!delta.deltaMessageReply.message.messageMetadata.threadKey.threadFbId,
 						mentions: mentions,
-						timestamp: delta.deltaMessageReply.message.messageMetadata.timestamp
+						timestamp: delta.deltaMessageReply.message.messageMetadata.timestamp,
+						participantIDs: (delta.deltaMessageReply.message.messageMetadata.cid.canonicalParticipantFbids || []).map(e => e.toString())
 					};
 
 					if (delta.deltaMessageReply.repliedToMessage) {
@@ -565,6 +545,11 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 				case "change_thread_icon":
 				case "change_thread_admins":
 				case "group_poll":
+				case "joinable_group_link_mode_change":
+				case "magic_words":
+				case "change_thread_approval_mode":
+				case "messenger_call_log":
+				case "participant_joined_group_call":
 					var fmtMsg;
 					try {
 						fmtMsg = utils.formatDeltaEvent(v.delta);
@@ -668,6 +653,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 										}],
 										mentions: {},
 										timestamp: parseInt(fetchData.timestamp_precise),
+										participantIDs: (fetchData.participants || (fetchData.messageMetadata ? fetchData.messageMetadata.cid ? fetchData.messageMetadata.cid.canonicalParticipantFbids : fetchData.messageMetadata.participantIds : []) || []),
 										isGroup: (fetchData.message_sender.id != tid.toString())
 									});
 									globalCallback(null, {
@@ -696,6 +682,7 @@ function parseDelta(defaultFuncs, api, ctx, globalCallback, v) {
 										}],
 										mentions: {},
 										timestamp: parseInt(fetchData.timestamp_precise),
+										participantIDs: (fetchData.participants || (fetchData.messageMetadata ? fetchData.messageMetadata.cid ? fetchData.messageMetadata.cid.canonicalParticipantFbids : fetchData.messageMetadata.participantIds : []) || []),
 										isGroup: (fetchData.message_sender.id != tid.toString())
 									});
 							}
@@ -747,52 +734,67 @@ function markDelivery(ctx, api, threadID, messageID) {
 	}
 }
 
+function getSeqId(defaultFuncs, api, ctx, globalCallback) {
+	const jar = ctx.jar;
+	utils
+		.get('https://www.facebook.com/', jar, null, ctx.globalOptions, { noRef: true })
+		.then(utils.saveCookies(jar))
+		.then(function (resData) {
+			const html = resData.body;
+			const oldFBMQTTMatch = html.match(/irisSeqID:"(.+?)",appID:219994525426954,endpoint:"(.+?)"/);
+			let mqttEndpoint = null;
+			let region = null;
+			let irisSeqID = null;
+			let noMqttData = null;
+
+			if (oldFBMQTTMatch) {
+				irisSeqID = oldFBMQTTMatch[1];
+				mqttEndpoint = oldFBMQTTMatch[2];
+				region = new URL(mqttEndpoint).searchParams.get("region").toUpperCase();
+				log.info("login", `Got this account's message region: ${region}`);
+			} else {
+				const newFBMQTTMatch = html.match(/{"app_id":"219994525426954","endpoint":"(.+?)","iris_seq_id":"(.+?)"}/);
+				if (newFBMQTTMatch) {
+					irisSeqID = newFBMQTTMatch[2];
+					mqttEndpoint = newFBMQTTMatch[1].replace(/\\\//g, "/");
+					region = new URL(mqttEndpoint).searchParams.get("region").toUpperCase();
+					log.info("login", `Got this account's message region: ${region}`);
+				} else {
+					const legacyFBMQTTMatch = html.match(/(\["MqttWebConfig",\[\],{fbid:")(.+?)(",appID:219994525426954,endpoint:")(.+?)(",pollingEndpoint:")(.+?)(3790])/);
+					if (legacyFBMQTTMatch) {
+						mqttEndpoint = legacyFBMQTTMatch[4];
+						region = new URL(mqttEndpoint).searchParams.get("region").toUpperCase();
+						log.warn("login", `Cannot get sequence ID with new RegExp. Fallback to old RegExp (without seqID)...`);
+						log.info("login", `Got this account's message region: ${region}`);
+						log.info("login", `[Unused] Polling endpoint: ${legacyFBMQTTMatch[6]}`);
+					} else {
+						log.warn("login", "Cannot get MQTT region & sequence ID.");
+						noMqttData = html;
+					}
+				}
+			}
+
+			ctx.lastSeqId = irisSeqID;
+			ctx.mqttEndpoint = mqttEndpoint;
+			ctx.region = region;
+			if (noMqttData) {
+				api["htmlData"] = noMqttData;
+			}
+
+			listenMqtt(defaultFuncs, api, ctx, globalCallback);
+		})
+		.catch(function (err) {
+			log.error("getSeqId", err);
+		});
+}
+
 module.exports = function (defaultFuncs, api, ctx) {
 	let globalCallback = identity;
-	getSeqID = function getSeqID() {
-		ctx.t_mqttCalled = false;
-		return defaultFuncs
-			.post("https://www.facebook.com/api/graphqlbatch/", ctx.jar, form)
-			.then(utils.parseAndCheckLogin(ctx, defaultFuncs))
-			.then((resData) => {
-				if (utils.getType(resData) != "Array") {
-					const err = new Error("Not logged in");
-					err.res = resData;
-					err.error = "Not logged in";
-					throw err;
-				}
-
-				if (resData && resData[resData.length - 1].error_results > 0) {
-					throw resData[0].o0.errors;
-				}
-
-				if (resData[resData.length - 1].successful_results === 0) {
-					throw { error: "getSeqId: there was no successful_results", res: resData };
-				}
-
-				if (resData[0].o0.data.viewer.message_threads.sync_sequence_id) {
-					ctx.lastSeqId = resData[0].o0.data.viewer.message_threads.sync_sequence_id;
-					listenMqtt(defaultFuncs, api, ctx, globalCallback);
-				} else {
-					const err = new Error("No sync_sequence_id found.");
-					err.res = resData;
-					err.error = "getSeqId: no sync_sequence_id found.";
-					throw err;
-				}
-			})
-			.catch((err) => {
-				// log.error("getSeqId", err);
-				if (utils.getType(err) == "Object" && (err.error === "Not logged in" || err.error === "Not logged in.")) {
-					ctx.loggedIn = false;
-				}
-				// return globalCallback(err);
-				throw err;
-			});
-	};
 
 	return function (callback) {
 		class MessageEmitter extends EventEmitter {
 			stopListening(callback) {
+
 				callback = callback || (() => { });
 				globalCallback = identity;
 				if (ctx.mqttClient) {
@@ -807,11 +809,9 @@ module.exports = function (defaultFuncs, api, ctx) {
 				}
 			}
 
-			async stopListeningSync() {
+			async stopListeningAsync() {
 				return new Promise((resolve) => {
-					this.stopListening((...data) => {
-						resolve(data);
-					});
+					this.stopListening(resolve);
 				});
 			}
 		}
@@ -824,39 +824,20 @@ module.exports = function (defaultFuncs, api, ctx) {
 			msgEmitter.emit("message", message);
 		});
 
-		//Reset some stuff
-		if (!ctx.firstListen) ctx.lastSeqId = null;
+		// Reset some stuff
+		if (!ctx.firstListen)
+			ctx.lastSeqId = null;
 		ctx.syncToken = undefined;
 		ctx.t_mqttCalled = false;
 
-		//Same request as getThreadList
-		form = {
-			"av": ctx.globalOptions.pageID,
-			"queries": JSON.stringify({
-				"o0": {
-					"doc_id": "3336396659757871",
-					"query_params": {
-						"limit": 1,
-						"before": null,
-						"tags": ["INBOX"],
-						"includeDeliveryReceipts": false,
-						"includeSeqID": true
-					}
-				}
-			})
-		};
-
 		if (!ctx.firstListen || !ctx.lastSeqId) {
-			getSeqID()
-				.catch(() => {
-					listenMqtt(defaultFuncs, api, ctx, globalCallback);
-				});
+			getSeqId(defaultFuncs, api, ctx, globalCallback);
 		} else {
 			listenMqtt(defaultFuncs, api, ctx, globalCallback);
 		}
-		ctx.firstListen = false;
+
 		api.stopListening = msgEmitter.stopListening;
-		api.stopListeningSync = msgEmitter.stopListeningSync;
+		api.stopListeningAsync = msgEmitter.stopListeningAsync;
 		return msgEmitter;
 	};
 };
