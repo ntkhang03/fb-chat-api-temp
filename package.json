@@ -25,7 +25,6 @@
 	"author": "Avery, David, Maude, Benjamin, UIRI, NTKhang (rebuild)",
 	"license": "MIT",
 	"dependencies": {
-		"bluebird": "^2.11.0",
 		"cheerio": "^0.22.0",
 		"https-proxy-agent": "^4.0.0",
 		"mqtt": "^3.0.0",
