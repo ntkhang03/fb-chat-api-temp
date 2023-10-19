@@ -2,9 +2,7 @@ This repo is a fork from main repo and will usually have new features bundled fa
 See main repo [here](https://github.com/Schmavery/facebook-chat-api).
 
 # Unofficial Facebook Chat API
-<a href="https://www.npmjs.com/package/fb-chat-api"><img alt="npm version" src="https://img.shields.io/npm/v/fb-chat-api.svg?style=flat-square"></a>
 <img alt="version" src="https://img.shields.io/github/package-json/v/fb-chat-api/fb-chat-api?label=github&style=flat-square">
-<a href="https://www.npmjs.com/package/fb-chat-api"><img src="https://img.shields.io/npm/dm/fb-chat-api.svg?style=flat-square" alt="npm downloads"></a>
 
 Facebook now has an official API for chat bots [here](https://developers.facebook.com/docs/messenger-platform).
 
@@ -17,20 +15,22 @@ See [below](#projects-using-this-api) for projects using this API.
 See the [full changelog](/CHANGELOG.md) for release details.
 
 ## Install
-If you just want to use fb-chat-api, you should use this command:
-```bash
-npm install fb-chat-api
-```
-It will download `fb-chat-api` from NPM repositories
+~~If you just want to use fb-chat-api, you should use this command:~~
+
+~~It will download `fb-chat-api` from NPM~~
+<h1><b>(Not available in NPM)</b></h1>
+
 
 ### Bleeding edge
 If you want to use bleeding edge (directly from github) to test new features or submit bug report, this is the command for you:
 ```bash
-npm install ntkhang03/fb-chat-api
+npm install ntkhang03/fb-chat-api-temp
 ```
+### Note
+**Currently, this repo is not available on NPM. Please use the bleeding edge version.**
 
 ## Testing your bots
-If you want to test your bots without creating another account on Facebook, you can use [Facebook Whitehat Accounts](https://www.facebook.com/whitehat/accounts/).
+~~If you want to test your bots without creating another account on Facebook, you can use [Facebook Whitehat Accounts](https://www.facebook.com/whitehat/accounts/).~~ (Facebook has removed this feature.)
 
 ## Prepare to login using appstate (cookie)
 Because of Facebook policy and the way Facebook check & secure accounts, you should not login using this library with username / password. We recommend using appstate / cookie to login more smoothly
@@ -61,8 +61,11 @@ node -e "require('./utils').getAppStateByPuppeteer()";
 ```
 
 ## Example Usage
+### Note
+**Currently, login with credentials is not available. You need to create a file named `appstate.json` to save your login state. You can use [c3c-fbstate](https://github.com/c3cbot/c3c-fbstate) to get fbstate.json (appstate.json)**
+
 ```javascript
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 // Login using email/phone & password (Not recommended)
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
@@ -77,6 +80,23 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 // Login using appState
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     ...
+});
+```
+
+Or use `appstate.json` to save your login state:
+
+```javascript
+const login = require("fb-chat-api-temp");
+const fs = require("fs");
+
+// Create simple echo bot
+login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
+		if(err) return console.error(err);
+		console.log("Logged in!");
+
+		api.listen((err, message) => {
+				api.sendMessage(message.body, message.threadID);
+		});
 });
 ```
 
@@ -107,7 +127,7 @@ __Tip__: to find your own ID, you can look inside the cookies. The `userID` is u
 
 __Example (Basic Message)__
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -120,7 +140,7 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 
 __Example (File upload)__
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -144,7 +164,7 @@ __Example__
 
 ```js
 const fs = require("fs");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 var credentials = {email: "FB_EMAIL", password: "FB_PASSWORD"};
 
@@ -168,7 +188,7 @@ __Example__
 
 ```js
 const fs = require("fs");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 // Simple echo bot. It will repeat everything that you say.
 // Will stop when you say '/stop'
