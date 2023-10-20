@@ -2,6 +2,7 @@
 ### You can use callback or .then() .catch() or async/await
 
 * [`login(credentials, options, [callback])`](#logincredentials-options-callback) ⇒ <code>Promise</code>
+* [`api.addExternalModule(moduleObj)`](#apiaddexternalmodulemoduleobj)
 * [`api.addUserToGroup(userID, threadID, [callback])`](#apiaddusertogroupuserid-threadid-callback) ⇒ <code>Promise</code>
 * [`api.changeAdminStatus(threadID, adminIDs, adminStatus, [callback])`](#apichangeadminstatusthreadid-adminids-adminstatus-callback) ⇒ <code>Promise</code>
 * [`api.changeArchivedStatus(threadOrThreads, archive, [callback])`](#apichangearchivedstatusthreadorthreads-archive-callback) ⇒ <code>Promise</code>
@@ -21,7 +22,7 @@
 * [`api.getFriendsList([callback])`](#apigetfriendslistcallback) ⇒ <code>Promise</code>
 * [`api.getMessage(threadID, messageID, [callback])`](#apigetmessagethreadid-messageid-callback) ⇒ <code>Promise</code>
 * [`api.getThreadHistory(threadID, amount, timestamp, [callback])`](#apigetthreadhistorythreadid-amount-timestamp-callback) ⇒ <code>Promise</code>
-* [`api.getThreadInfo(threadID, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
+* [`api.getThreadInfo(threadIDs, [callback])`](#apigetthreadinfothreadids-callback) ⇒ <code>Promise</code>
 * [`api.getThreadList(limit, timestamp, tags, [callback])`](#apigetthreadlistlimit-timestamp-tags-callback) ⇒ <code>Promise</code>
 * [`api.getThreadPictures(threadID, offset, limit, [callback])`](#apigetthreadpicturesthreadid-offset-limit-callback) ⇒ <code>Promise</code>
 * [`api.getUserID(name, [callback])`](#apigetuseridname-callback) ⇒ <code>Promise</code>
@@ -49,6 +50,7 @@
 * [`api.setTitle(newTitle, threadID, [callback])`](#apisettitlenewtitle-threadid-callback) ⇒ <code>Promise</code>
 * [`api.threadColors`](#apithreadcolors) ⇒ <code>Object</code>
 * [`api.unsendMessage(messageID, [callback])`](#apiunsendmessagemessageid-callback) ⇒ <code>Promise</code>
+* [`api.uploadAttachment(attachments, [callback])`](#apiuploadattachmentattachments-callback) ⇒ <code>Promise</code>
 
 ---------------------------------------
 
@@ -107,11 +109,15 @@ __Arguments__
 * `credentials`: An object containing the fields `email` and `password` used to login, __*or*__ an object containing the field `appState`.
 * `options`: An object representing options to use when logging in (as described in [api.setOptions](#setOptions)).
 * `callback(err, api)`: A callback called when login is done (successful or not). `err` is an object containing a field `error`.
+---
 
-__Example (Email & Password)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
+<h1><b>Now login with account and password is no longer available, <a href="#loginWithAppstate">use appState</a> login instead.</b></h1>
+
+
+~~__Example (Email & Password)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)~~
 
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -119,11 +125,11 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 });
 ```
 
-__Example (Email & Password then save appState to file)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
+~~__Example (Email & Password then save appState to file)__: (it is no longer usable, please use [this](#loginWithAppstate) alternative method)~~
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -133,12 +139,12 @@ login({email: "FB_EMAIL", password: "FB_PASSWORD"}, (err, api) => {
 ```
 
 
-__Login Approvals (2-Factor Auth)__: When you try to login with Login Approvals enabled, your callback will be called with an error `'login-approval'` that has a `continue` function that accepts the approval code as a `string` or a `number`. (it is no longer usable, please use [this](#loginWithAppstate) alternative method)
+~~__Login Approvals (2-Factor Auth)__: When you try to login with Login Approvals enabled, your callback will be called with an error `'login-approval'` that has a `continue` function that accepts the approval code as a `string` or a `number`. (it is no longer usable, please use [this](#loginWithAppstate) alternative method)~~
 
 __Example__:
 
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 const readline = require("readline");
 
 var rl = readline.createInterface({
@@ -176,7 +182,7 @@ __Review Recent Login__: Sometimes Facebook will ask you to review your recent l
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -184,6 +190,24 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 });
 ```
 
+
+---------------------------------------
+
+<a name="apiaddexternalmodulemoduleobj"></a>
+### api.addExternalModule(moduleObj)
+
+This function is used to add external modules to the api object, each module is a function that takes 3 arguments: `defaultFuncs`, `api`, `ctx` and returns a function that will be added to the api object.
+
+Example:
+```js
+api.addExternalModule({
+	"example": function(defaultFuncs, api, ctx) {
+		return function () {
+			console.log("globalOptions", ctx.globalOptions);
+		};
+	}
+});
+```
 
 ---------------------------------------
 
@@ -197,6 +221,16 @@ __Arguments__
 * `userID`: User ID or array of user IDs.
 * `threadID`: Group chat ID.
 * `callback(err)`: A callback called when the query is done (either with an error or with no arguments).
+
+__Example__
+
+```js
+api.addUserToGroup("1234567890", "0987654321", (err) => {
+	if(err)
+		return console.error(err);
+	console.log("Added user to group.");
+});
+```
 
 ---------------------------------------
 
@@ -215,7 +249,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if (err) return console.error(err);
@@ -251,7 +285,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -291,7 +325,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -319,7 +353,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -349,7 +383,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -378,7 +412,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -418,7 +452,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -446,7 +480,7 @@ __Arguments__
 __Example__
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -479,7 +513,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -536,7 +570,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -566,7 +600,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -635,13 +669,44 @@ function loadNextThreadHistory(api){
 ---------------------------------------
 
 <a name="getThreadInfo"></a>
-### api.getThreadInfo(threadID, [callback])
+### api.getThreadInfo(threadIDs, [callback])
 
 Takes a threadID and a callback.  Works for both single-user and group threads.
 
 __Arguments__
-* `threadID`: A threadID corresponding to the target thread.
-* `callback(err, info)`: If `err` is `null`, `info` will contain the following properties:
+* `threadIDs`: Either a string/number for one ID or an array of strings/numbers for a batched query.
+* `callback(err, info)`: If `err` is `null`, `info` will return
+<!-- * in nghiêng chữ -->
+*if `threadIDs` is an array of IDs, `info` will be an array of objects with the following fields:*
+```js
+{
+	"4000000000000000": {
+		threadID: "4000000000000000",
+		threadName: "Thread Name",
+		// ...
+		// thread info
+	},
+	"5000000000000000": {
+		threadID: "5000000000000000",
+		threadName: "Thread Name",
+		// ...
+		// thread info
+	},
+	// ...
+}
+```
+
+*if `threadIDs` is a single ID, `info` will be an object with the following fields:*
+```js
+{
+	threadID: "4000000000000000",
+	threadName: "Thread Name",
+	// ...
+	// thread info
+}
+```
+
+`info` will contain the following fields:
 
 |        Key        |                                                                                                           Description                                                                                                            |
 | :---------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
@@ -918,7 +983,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -944,13 +1009,27 @@ Will get some information about the given users.
 __Arguments__
 
 * `ids` - Either a string/number for one ID or an array of strings/numbers for a batched query.
-* `callback(err, obj)` - A callback called when the query is done (either with an error or with an confirmation object). `obj` is a mapping from userId to another object containing the following properties: `name`, `firstName`, `vanity` (user's chosen facebook handle, if any), `thumbSrc`, `profileUrl`, `gender`, `type` (type is generally user, group, page, event or app), `isFriend`, `isBirthday`, `searchTokens`, `alternateName`.
+* `callback(err, obj)` - A callback called when the query is done (either with an error or with an confirmation object). `obj` is a mapping from userId to another object containing the following properties: 
+
+| Key           | Description                                                        |
+| ------------- | ------------------------------------------------------------------ |
+| name          | Name of the user                                                   |
+| firstName     | First name of the user                                             |
+| vanity        | the username of the user if any                                    |
+| thumbSrc      | URL of the profile picture                                         |
+| profileUrl    | URL of the profile                                                 |
+| gender        | the gender of the user, with 1 is Female, 2 is Male, 0 is unknown  |
+| type          | type is generally user, group, page, event or app                  |
+| isFriend      | is the user a friend of the current user, either `true` or `false` |
+| isBirthday    | is the user having a birthday today, either `true` or `false`      |
+| searchTokens  | an array of strings that can be used to search for the user        |
+| alternateName |                                                                    |
 
 __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1398,7 +1477,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 // Simple echo bot. He'll repeat anything that you say.
 // Will stop when you say '/stop'
@@ -1493,7 +1572,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1538,7 +1617,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1626,7 +1705,7 @@ __Tip__: to find your own ID, you can look inside the cookies. The `userID` is u
 __Example (Basic Message)__
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1640,7 +1719,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 __Example (File upload)__
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
     if(err) return console.error(err);
@@ -1657,7 +1736,7 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 
 __Example (Mention)__
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
@@ -1681,7 +1760,7 @@ login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
 
 __Example (Location)__
 ```js
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 login({email: "EMAIL", password: "PASSWORD"}, (err, api) => {
     if(err) return console.error(err);
     var yourID = "000000000000000";
@@ -1763,7 +1842,7 @@ __Example__
 
 ```js
 const fs = require("fs-extra");
-const login = require("fb-chat-api");
+const login = require("fb-chat-api-temp");
 
 // Simple echo bot. This will send messages forever.
 
@@ -1837,3 +1916,33 @@ __Arguments__
 * `callback(err)`: A callback called when the query is done (with an error or with null).
 
 ---------------------------------------
+
+<a name="uploadAttachments"></a>
+### api.uploadAttachment(attachments, [callback])
+This function is used to upload attachments to Facebook. It is used internally by [api.sendMessage](#apisendmessagemessage-threadid-callback-messageid).
+
+__Arguments__
+<!--  readable stream or an array of readable streams. -->
+* `attachments`: A readable stream or an array of readable streams to upload.
+* `callback(err, info)`: A callback called when the upload is done (either with an error or with the uploaded file info).
+
+__Example__
+
+```js
+const fs = require("fs-extra");
+const login = require("fb-chat-api-temp");
+login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, api) => {
+	if (err)
+		return console.error(err);
+
+	// Send a local file as a stream
+	const iamgeOne = fs.createReadStream(__dirname + '/image.jpg');
+	const iamgeTwo = fs.createReadStream(__dirname + '/image2.jpg');
+
+	api.uploadAttachment([iamgeOne, iamgeTwo], (err, attachments) => {
+		if(err)
+			return console.error(err);
+			
+		console.log(attachments);
+	});
+});

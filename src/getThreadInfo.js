@@ -1,7 +1,7 @@
 "use strict";
 
-var utils = require("../utils");
-var log = require("npmlog");
+const utils = require("../utils");
+const log = require("npmlog");
 
 function formatEventReminders(reminder) {
 	return {
@@ -31,14 +31,18 @@ function formatEventReminders(reminder) {
 }
 
 function formatThreadGraphQLResponse(data) {
-	var messageThread = data.o0.data.message_thread;
-	var threadID = messageThread.thread_key.thread_fbid
+	if (data.errors)
+		return data.errors;
+	const messageThread = data.message_thread;
+	if (!messageThread)
+		return null;
+	const threadID = messageThread.thread_key.thread_fbid
 		? messageThread.thread_key.thread_fbid
 		: messageThread.thread_key.other_user_id;
 
 	// Remove me
-	var lastM = messageThread.last_message;
-	var snippetID =
+	const lastM = messageThread.last_message;
+	const snippetID =
 		lastM &&
 			lastM.nodes &&
 			lastM.nodes[0] &&
@@ -46,10 +50,10 @@ function formatThreadGraphQLResponse(data) {
 			lastM.nodes[0].message_sender.messaging_actor
 			? lastM.nodes[0].message_sender.messaging_actor.id
 			: null;
-	var snippetText =
+	const snippetText =
 		lastM && lastM.nodes && lastM.nodes[0] ? lastM.nodes[0].snippet : null;
-	var lastR = messageThread.last_read_receipt;
-	var lastReadTimestamp =
+	const lastR = messageThread.last_read_receipt;
+	const lastReadTimestamp =
 		lastR && lastR.nodes && lastR.nodes[0] && lastR.nodes[0].timestamp_precise
 			? lastR.nodes[0].timestamp_precise
 			: null;
@@ -148,9 +152,9 @@ function formatThreadGraphQLResponse(data) {
 
 module.exports = function (defaultFuncs, api, ctx) {
 	return function getThreadInfoGraphQL(threadID, callback) {
-		var resolveFunc = function () { };
-		var rejectFunc = function () { };
-		var returnPromise = new Promise(function (resolve, reject) {
+		let resolveFunc = function () { };
+		let rejectFunc = function () { };
+		const returnPromise = new Promise(function (resolve, reject) {
 			resolveFunc = resolve;
 			rejectFunc = reject;
 		});
@@ -164,22 +168,28 @@ module.exports = function (defaultFuncs, api, ctx) {
 			};
 		}
 
+		if (utils.getType(threadID) !== "Array") {
+			threadID = [threadID];
+		}
+
+		let form = {};
 		// `queries` has to be a string. I couldn't tell from the dev console. This
 		// took me a really long time to figure out. I deserve a cookie for this.
-		var form = {
-			queries: JSON.stringify({
-				o0: {
-					// This doc_id is valid as of July 20th, 2020
-					doc_id: "3449967031715030",
-					query_params: {
-						id: threadID,
-						message_limit: 0,
-						load_messages: false,
-						load_read_receipts: false,
-						before: null
-					}
+		threadID.map(function (t, i) {
+			form["o" + i] = {
+				doc_id: "3449967031715030",
+				query_params: {
+					id: t,
+					message_limit: 0,
+					load_messages: false,
+					load_read_receipts: false,
+					before: null
 				}
-			}),
+			};
+		});
+
+		form = {
+			queries: JSON.stringify(form),
 			batch_name: "MessengerGraphQLThreadFetcher"
 		};
 
@@ -194,13 +204,23 @@ module.exports = function (defaultFuncs, api, ctx) {
 				// This returns us an array of things. The last one is the success /
 				// failure one.
 				// @TODO What do we do in this case?
-				if (resData[resData.length - 1].error_results !== 0) {
-					throw resData[0].o0.errors[0];
+				// if (resData[resData.length - 1].error_results !== 0) {
+				// 	throw resData[0].o0.errors[0];
+				// }
+				// if (!resData[0].o0.data.message_thread) {
+				// 	throw new Error("can't find this thread");
+				// }
+				const threadInfos = {};
+				for (let i = resData.length - 2; i >= 0; i--) {
+					const threadInfo = formatThreadGraphQLResponse(resData[i][Object.keys(resData[i])[0]].data);
+					threadInfos[threadInfo?.threadID || threadID[threadID.length - 1 - i]] = threadInfo;
 				}
-				if (!resData[0].o0.data.message_thread) {
-					throw new Error("can't find this thread");
+				if (Object.values(threadInfos).length == 1) {
+					callback(null, Object.values(threadInfos)[0]);
 				}
-				callback(null, formatThreadGraphQLResponse(resData[0]));
+				else {
+					callback(null, threadInfos);
+				}
 			})
 			.catch(function (err) {
 				log.error("getThreadInfoGraphQL", err);
