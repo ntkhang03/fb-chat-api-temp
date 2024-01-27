@@ -1490,7 +1490,17 @@ function decodeClientPayload(payload) {
 	/*
 	Special function which Client using to "encode" clients JSON payload
 	*/
+	
+	/* 
+	FIX: RangeError maximum stack call exceed
+	SEE: https://stackoverflow.com/questions/8936984/uint8array-to-string-in-javascript
+	*/
+	let decoded = new TextDecoder().decode(new Uint8Array(payload))
+	return JSON.parse(decoded);
+	
+	/* LEGACY CODE
 	return JSON.parse(String.fromCharCode.apply(null, payload));
+	*/
 }
 
 function getAppState(jar) {
