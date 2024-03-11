@@ -1512,7 +1512,7 @@ function getAppState(jar) {
 
 function getAppStateByPuppeteer() {
 	const fs = require("fs");
-	const puppeteer = require("puppeteer");
+	const puppeteer = require("puppeteer-core");
 
 	if (!process.env.PUPPETEER_EXECUTABLE_PATH) {
 		return console.log('WARNING: You must set enviroment PUPPETEER_EXECUTABLE_PATH to your Google Chrome\'s path to avoid Facebook security check.')
@@ -1521,8 +1521,16 @@ function getAppStateByPuppeteer() {
 	(async () => {
 		let appstate = [];
 
-		const browser = await puppeteer.launch({headless: false});
-		const page = await browser.newPage()
+		const browser = await puppeteer.launch({
+			headless: false,
+			executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+			// args: [`--proxy-server=cloud.phamthanh.me:1201`]
+		});
+		const page = await browser.newPage();
+		await page.authenticate({
+	        // username: 'username',
+	        // password: 'password',
+	    })
 		const navigationPromise = page.waitForNavigation({waitUntil: 'networkidle0'});
 
 		await page.goto('https://www.facebook.com/');
