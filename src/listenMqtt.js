@@ -104,7 +104,7 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 	const mqttClient = ctx.mqttClient;
 
 	mqttClient.on('error', function (err) {
-		log.error("listenMqtt", err);
+		log.error("ERROR", err);
 		mqttClient.end();
 		if (ctx.globalOptions.autoReconnect) {
 			listenMqtt(defaultFuncs, api, ctx, globalCallback);
@@ -126,8 +126,31 @@ function listenMqtt(defaultFuncs, api, ctx, globalCallback) {
 	});
 
 	mqttClient.on('close', function () {
-
+		log.error("CLOSE", "Client closed");
+		mqttClient.end();
+		globalCallback({
+			type: "close",
+			error: "Client closed"
+		}, null)
 	});
+
+	mqttClient.on('offline', () => {
+		log.error("OFFLINE", "Client went offline");
+		mqttClient.end();
+		globalCallback({
+			type: "offline",
+			error: "Client went offline, closing"
+		}, null)
+	})
+
+	mqttClient.on('disconnect', (packet) => {
+		log.error("DISCONNECT", "Received disconnect packet");
+		mqttClient.end();
+		globalCallback({
+			type: "disconnect",
+			error: "Client disconnected"
+		}, null)
+	})
 
 	mqttClient.on('connect', function () {
 		topics.forEach(function (topicsub) {
