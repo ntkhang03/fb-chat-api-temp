@@ -1490,7 +1490,17 @@ function decodeClientPayload(payload) {
 	/*
 	Special function which Client using to "encode" clients JSON payload
 	*/
+	
+	/* 
+	FIX: RangeError maximum stack call exceed
+	SEE: https://stackoverflow.com/questions/8936984/uint8array-to-string-in-javascript
+	*/
+	let decoded = new TextDecoder().decode(new Uint8Array(payload))
+	return JSON.parse(decoded);
+	
+	/* LEGACY CODE
 	return JSON.parse(String.fromCharCode.apply(null, payload));
+	*/
 }
 
 function getAppState(jar) {
@@ -1499,6 +1509,67 @@ function getAppState(jar) {
 		.concat(jar.getCookies("https://facebook.com"))
 		.concat(jar.getCookies("https://www.messenger.com"));
 }
+
+function getAppStateByPuppeteer() {
+	const fs = require("fs");
+	const puppeteer = require("puppeteer-core");
+
+	if (!process.env.PUPPETEER_EXECUTABLE_PATH) {
+		return console.log('WARNING: You must set enviroment PUPPETEER_EXECUTABLE_PATH to your Google Chrome\'s path to avoid Facebook security check.')
+	}
+
+	(async () => {
+		let appstate = [];
+
+		const browser = await puppeteer.launch({
+			headless: false,
+			executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+			// args: [`--proxy-server=cloud.phamthanh.me:1201`]
+		});
+		const page = await browser.newPage();
+		await page.authenticate({
+	        // username: 'username',
+	        // password: 'password',
+	    })
+		const navigationPromise = page.waitForNavigation({waitUntil: 'networkidle0'});
+
+		await page.goto('https://www.facebook.com/');
+
+		let defaultWaitOpt = {timeout: 10 * 60e3}
+
+		await page.waitForSelector('#email', defaultWaitOpt);
+		await page.evaluate(() => {
+			return alert('Please login manually to your account and navigate to Home Feed page after logged in.')
+		});
+		// await page.type('#email', email);
+		// await page.type('#pass', password);
+		// await page.click('button[name="login"]');
+
+		await page.waitForSelector('div[role=feed]', defaultWaitOpt);
+		await page.waitForTimeout(3e3);
+		let cookiesF = await page.cookies();
+	 	
+		await page.goto('https://www.messenger.com/');
+		await page.waitForSelector('[data-testid*="mw_message"]', defaultWaitOpt);
+		await page.waitForTimeout(3e3);
+
+		let cookiesM = await page.cookies();
+
+		let mapper = ({name: key, ...rest}) => ({key, ...rest});
+
+		appstate = appstate.concat(cookiesM.map(mapper));
+		appstate = appstate.concat(cookiesF.map(mapper));
+
+		fs.writeFileSync('appstate.json', JSON.stringify(appstate));
+
+		await page.evaluate(() => {
+			return alert('Cookies is saved at "appstate.json".')
+		});
+
+		await browser.close();
+	})();
+}
+
 module.exports = {
 	CustomError,
 	isReadableStream,
@@ -1537,8 +1608,8 @@ module.exports = {
 	formatDate,
 	decodeClientPayload,
 	getAppState,
+	getAppStateByPuppeteer,
 	getAdminTextMessageType,
 	setProxy,
 	checkLiveCookie
 };
-

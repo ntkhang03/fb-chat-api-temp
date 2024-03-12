@@ -122,7 +122,7 @@ function buildAPI(globalOptions, html, jar) {
 			region = new URL(mqttEndpoint).searchParams.get("region").toUpperCase();
 			log.info("login", `Got this account's message region: ${region}`);
 		} else {
-			const legacyFBMQTTMatch = html.match(/(\["MqttWebConfig",\[\],{fbid:")(.+?)(",appID:219994525426954,endpoint:")(.+?)(",pollingEndpoint:")(.+?)(3790])/);
+			const legacyFBMQTTMatch = html.match(/(\["MqttWebConfig",\[\],{"?fbid"?:")(.+?)(","?appID"?:219994525426954,"?endpoint"?:")(.+?)(","?pollingEndpoint"?:")(.+?)(3790])/);
 			if (legacyFBMQTTMatch) {
 				mqttEndpoint = legacyFBMQTTMatch[4];
 				region = new URL(mqttEndpoint).searchParams.get("region").toUpperCase();

@@ -139,7 +139,7 @@ function formatMessage(threadID, data) {
 					[r.user.id]: r.reaction
 				})),
 				attachments: data.blob_attachments && data.blob_attachments.length > 0 ?
-					data.blob_attachments.length.map(att => {
+					data.blob_attachments.map(att => {
 						let x;
 						try {
 							x = utils._formatAttachment(att);
