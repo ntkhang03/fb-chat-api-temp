@@ -7,6 +7,14 @@ const log = require("npmlog");
 const DEFAULT_BASE_URL = "http://127.0.0.1:8080";
 const DEFAULT_TIMEOUT_MS = 15000;
 
+function trimTrailingSlashes(url) {
+	let out = url;
+	while (out.length > 0 && out.charAt(out.length - 1) === "/") {
+		out = out.slice(0, -1);
+	}
+	return out;
+}
+
 function buildError(message, details) {
 	const err = new Error(message);
 	Object.assign(err, details || {});
@@ -65,7 +73,7 @@ class MessagixTransport {
 	constructor(config, ctx) {
 		const cfg = config || {};
 		this.ctx = ctx;
-		this.baseUrl = (cfg.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
+		this.baseUrl = trimTrailingSlashes(cfg.baseUrl || DEFAULT_BASE_URL);
 		this.timeoutMs = cfg.timeoutMs || DEFAULT_TIMEOUT_MS;
 		this.apiKey = cfg.apiKey || cfg.token || null;
 	}
