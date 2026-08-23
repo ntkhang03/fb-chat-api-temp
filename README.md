@@ -66,6 +66,55 @@ login({appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8'))}, (err, ap
 });
 ```
 
+## Messagix transport (MVP)
+
+This package now supports a transport adapter model:
+
+- `legacy` (default): existing Node implementation
+- `messagix`: Node adapter + Go Messagix sidecar over HTTP
+
+For MVP, E2EE is terminated in the Go sidecar. Node receives plaintext events.
+
+### Messagix setup
+
+1. Run your Go sidecar (default base URL: `http://127.0.0.1:8080`)
+2. Initialize with `transport: "messagix"`
+
+```js
+const login = require("fb-chat-api-temp");
+
+login(
+	{ appState: [] },
+	{
+		transport: "messagix",
+		messagix: {
+			baseUrl: "http://127.0.0.1:8080",
+			apiKey: process.env.MESSAGIX_API_KEY,
+			timeoutMs: 15000
+		}
+	},
+	(err, api) => {
+		if (err) return console.error(err);
+
+		api.listen((listenErr, event) => {
+			if (listenErr) return console.error(listenErr);
+			if (event.type === "message" && event.body) {
+				api.sendMessage("Echo: " + event.body, event.threadID);
+			}
+		});
+	}
+);
+```
+
+Assumed MVP sidecar endpoints:
+
+- `POST /auth/login`
+- `POST /messages/send`
+- `POST /threads/read`
+- `POST /threads/typing`
+- `GET /threads/:id`
+- `GET /events/stream`
+
 Result:
 
 <img width="517" alt="screen shot 2016-11-04 at 14 36 00" src="https://cloud.githubusercontent.com/assets/4534692/20023545/f8c24130-a29d-11e6-9ef7-47568bdbc1f2.png">

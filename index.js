@@ -2,6 +2,8 @@
 
 const utils = require("./utils");
 const log = require("npmlog");
+const { MessagixTransport, DEFAULT_BASE_URL, DEFAULT_TIMEOUT_MS } = require("./src/transport/messagix");
+const { applyTransportToAPI } = require("./src/transport/types");
 
 let checkVerified = null;
 
@@ -66,6 +68,12 @@ function setOptions(globalOptions, options) {
 				break;
 			case 'emitReady':
 				globalOptions.emitReady = Boolean(options.emitReady);
+				break;
+			case 'transport':
+				globalOptions.transport = options.transport === "messagix" ? "messagix" : "legacy";
+				break;
+			case 'messagix':
+				globalOptions.messagix = Object.assign({}, globalOptions.messagix || {}, options.messagix || {});
 				break;
 			default:
 				log.warn("setOptions", "Unrecognized option given to setOptions: " + key);
@@ -237,6 +245,46 @@ function buildAPI(globalOptions, html, jar) {
 	return [ctx, defaultFuncs, api];
 }
 
+function buildMessagixAPI(globalOptions, loginData, callback) {
+	const ctx = {
+		userID: null,
+		i_userID: null,
+		globalOptions: globalOptions,
+		loggedIn: true
+	};
+
+	const transport = new MessagixTransport(globalOptions.messagix, ctx);
+	const api = {
+		setOptions: setOptions.bind(null, globalOptions),
+		getAppState: function getAppState() {
+			return ctx.appState || [];
+		},
+		getCurrentUserID: function getCurrentUserID() {
+			return ctx.userID;
+		}
+	};
+
+	transport
+		.login(loginData || {})
+		.then(function (authData) {
+			if (authData && (authData.userID || authData.userId)) {
+				ctx.userID = (authData.userID || authData.userId).toString();
+			}
+
+			if (!ctx.userID && loginData && loginData.userID) {
+				ctx.userID = loginData.userID.toString();
+			}
+
+			ctx.appState = authData && authData.appState ? authData.appState : (loginData && loginData.appState) || [];
+			applyTransportToAPI(api, transport);
+			callback(null, api);
+		})
+		.catch(function (err) {
+			log.error("messagixLogin", err);
+			callback(err);
+		});
+}
+
 // Helps the login
 function loginHelper(appState, email, password, globalOptions, callback, prCallback) {
 	let mainPromise = null;
@@ -359,7 +407,12 @@ function login(loginData, options, callback) {
 		logRecordSize: defaultLogRecordSize,
 		online: true,
 		emitReady: false,
-		userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18"
+		userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/600.3.18 (KHTML, like Gecko) Version/8.0.3 Safari/600.3.18",
+		transport: "legacy",
+		messagix: {
+			baseUrl: DEFAULT_BASE_URL,
+			timeoutMs: DEFAULT_TIMEOUT_MS
+		}
 	};
 
 	setOptions(globalOptions, options);
@@ -380,6 +433,11 @@ function login(loginData, options, callback) {
 		};
 		callback = prCallback;
 	}
+	if (globalOptions.transport === "messagix") {
+		buildMessagixAPI(globalOptions, loginData, callback);
+		return returnPromise;
+	}
+
 	loginHelper(loginData.appState, loginData.email, loginData.password, globalOptions, callback, prCallback);
 	return returnPromise;
 }
